@@ -1,0 +1,92 @@
+{
+    "@@locale": "vi",
+    "appName": "Việc cần làm",
+    "myTasks": "Công việc",
+    "favorites": "Yêu thích",
+    "newList": "Danh sách mới",
+    "today": "Hôm nay",
+    "daysRemaining": "Còn {count} ngày",
+    "@daysRemaining": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "overdue": "Quá hạn {count} ngày",
+    "@overdue": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sortByDate": "Sắp xếp theo ngày",
+    "sortByName": "Sắp xếp theo tên",
+    "addTask": "Thêm công việc",
+    "editTask": "Sửa công việc",
+    "taskTitle": "Tiêu đề",
+    "taskDescription": "Mô tả",
+    "taskTitleHint": "Nhập tiêu đề công việc",
+    "taskDescriptionHint": "Nhập mô tả (tùy chọn)",
+    "date": "Ngày",
+    "time": "Giờ",
+    "lunarCalendar": "Âm lịch",
+    "solarCalendar": "Dương lịch",
+    "repeat": "Lặp lại",
+    "noRepeat": "Không lặp",
+    "daily": "Hàng ngày",
+    "weekly": "Hàng tuần",
+    "monthly": "Hàng tháng",
+    "yearly": "Hàng năm",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "markComplete": "Hoàn thành",
+    "markIncomplete": "Chưa hoàn thành",
+    "settings": "Cài đặt",
+    "calendarMode": "Chế độ lịch",
+    "lunarOnly": "Chỉ âm lịch",
+    "solarOnly": "Chỉ dương lịch",
+    "bothCalendars": "Cả hai",
+    "theme": "Giao diện",
+    "darkMode": "Chế độ tối",
+    "lightMode": "Chế độ sáng",
+    "systemMode": "Theo hệ thống",
+    "language": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "notifications": "Thông báo",
+    "about": "Thông tin",
+    "aboutApp": "Về ứng dụng",
+    "author": "Tác giả",
+    "supportAuthor": "Ủng hộ tác giả",
+    "bankInfo": "Thông tin chuyển khoản",
+    "bankName": "Ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountHolder": "Chủ tài khoản",
+    "copyAccountNumber": "Sao chép STK",
+    "copied": "Đã sao chép",
+    "version": "Phiên bản",
+    "confirmDelete": "Xác nhận xóa?",
+    "confirmDeleteMessage": "Bạn có chắc muốn xóa công việc này?",
+    "taskCompleted": "Đã hoàn thành!",
+    "nextOccurrence": "Lần tiếp theo: {date}",
+    "@nextOccurrence": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
+    "noTasks": "Chưa có công việc nào",
+    "noFavorites": "Chưa có mục yêu thích",
+    "lunar": "Âm",
+    "solar": "Dương",
+    "backupRestore": "Sao lưu & Khôi phục",
+    "backupData": "Sao lưu dữ liệu",
+    "restoreData": "Khôi phục dữ liệu",
+    "backupSuccess": "Sao lưu thành công",
+    "restoreSuccess": "Khôi phục thành công",
+    "error": "Lỗi"
+}

@@ -1,0 +1,92 @@
+{
+    "@@locale": "en",
+    "appName": "To-Do",
+    "myTasks": "My Tasks",
+    "favorites": "Favorites",
+    "newList": "New List",
+    "today": "Today",
+    "daysRemaining": "{count} days left",
+    "@daysRemaining": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "overdue": "{count} days overdue",
+    "@overdue": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sortByDate": "Sort by date",
+    "sortByName": "Sort by name",
+    "addTask": "Add task",
+    "editTask": "Edit task",
+    "taskTitle": "Title",
+    "taskDescription": "Description",
+    "taskTitleHint": "Enter task title",
+    "taskDescriptionHint": "Enter description (optional)",
+    "date": "Date",
+    "time": "Time",
+    "lunarCalendar": "Lunar calendar",
+    "solarCalendar": "Solar calendar",
+    "repeat": "Repeat",
+    "noRepeat": "No repeat",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "markComplete": "Mark complete",
+    "markIncomplete": "Mark incomplete",
+    "settings": "Settings",
+    "calendarMode": "Calendar mode",
+    "lunarOnly": "Lunar only",
+    "solarOnly": "Solar only",
+    "bothCalendars": "Both",
+    "theme": "Theme",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "systemMode": "System",
+    "language": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "notifications": "Notifications",
+    "about": "About",
+    "aboutApp": "About app",
+    "author": "Author",
+    "supportAuthor": "Support author",
+    "bankInfo": "Bank transfer info",
+    "bankName": "Bank",
+    "accountNumber": "Account number",
+    "accountHolder": "Account holder",
+    "copyAccountNumber": "Copy account number",
+    "copied": "Copied",
+    "version": "Version",
+    "confirmDelete": "Confirm delete?",
+    "confirmDeleteMessage": "Are you sure you want to delete this task?",
+    "taskCompleted": "Completed!",
+    "nextOccurrence": "Next: {date}",
+    "@nextOccurrence": {
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
+    "noTasks": "No tasks yet",
+    "noFavorites": "No favorites yet",
+    "lunar": "Lunar",
+    "solar": "Solar",
+    "backupRestore": "Backup & Restore",
+    "backupData": "Backup data",
+    "restoreData": "Restore data",
+    "backupSuccess": "Backup successful",
+    "restoreSuccess": "Restore successful",
+    "error": "Error"
+}

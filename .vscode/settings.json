@@ -1,0 +1,6 @@
+{
+    "dart.projectSearchDepth": 10,
+    "dart.flutterSdkPath": "auto",
+    "dart.enableSdkFormatter": true,
+    "editor.formatOnSave": true
+}
