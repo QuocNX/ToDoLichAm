@@ -88,5 +88,6 @@
     "restoreData": "Restore data",
     "backupSuccess": "Backup successful",
     "restoreSuccess": "Restore successful",
-    "error": "Error"
+    "error": "Error",
+    "completedTasks": "Completed"
 }

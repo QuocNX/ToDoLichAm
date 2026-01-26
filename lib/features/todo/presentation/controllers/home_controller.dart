@@ -3,9 +3,6 @@ import 'package:todo_lich_am/core/utils/lunar_calendar_utils.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
 
-/// Sort type for tasks.
-enum SortType { byDate, byName }
-
 /// Tab type for filtering.
 enum TabType { favorites, myTasks }
 
@@ -18,7 +15,6 @@ class HomeController extends GetxController {
   // Observable state
   final RxList<TaskEntity> tasks = <TaskEntity>[].obs;
   final RxBool isLoading = true.obs;
-  final Rx<SortType> sortType = SortType.byDate.obs;
   final Rx<TabType> currentTab = TabType.myTasks.obs;
 
   @override
@@ -50,28 +46,36 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Changes the sort type.
-  void changeSortType(SortType type) {
-    sortType.value = type;
-    _sortTasks();
-  }
-
   void _sortTasks() {
-    switch (sortType.value) {
-      case SortType.byDate:
-        tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
-        break;
-      case SortType.byName:
-        tasks.sort((a, b) => a.title.compareTo(b.title));
-        break;
-    }
+    tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
 
-  /// Groups tasks by date for display.
+  /// Groups uncompleted tasks by date for display.
   Map<DateTime, List<TaskEntity>> get groupedTasks {
     final Map<DateTime, List<TaskEntity>> grouped = {};
 
-    for (final task in tasks) {
+    for (final task in tasks.where((t) => !t.isCompleted)) {
+      final dateKey = DateTime(
+        task.dueDate.year,
+        task.dueDate.month,
+        task.dueDate.day,
+      );
+
+      grouped.putIfAbsent(dateKey, () => []).add(task);
+    }
+
+    // Sort the map by date
+    final sortedEntries = grouped.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    return Map.fromEntries(sortedEntries);
+  }
+
+  /// Groups completed tasks by date for display.
+  Map<DateTime, List<TaskEntity>> get groupedCompletedTasks {
+    final Map<DateTime, List<TaskEntity>> grouped = {};
+
+    for (final task in tasks.where((t) => t.isCompleted)) {
       final dateKey = DateTime(
         task.dueDate.year,
         task.dueDate.month,

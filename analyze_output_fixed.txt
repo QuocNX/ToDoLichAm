@@ -1,0 +1,11 @@
+﻿Analyzing ToDoLichAm...                                         
+
+   info - 'Share' is deprecated and shouldn't be used. Use SharePlus instead - lib\features\settings\data\services\backup_service.dart:59:13 - deprecated_member_use
+   info - 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead - lib\features\settings\data\services\backup_service.dart:59:19 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\features\settings\presentation\pages\settings_page.dart:100:11 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\features\settings\presentation\pages\settings_page.dart:102:11 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\features\settings\presentation\pages\settings_page.dart:131:11 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\features\settings\presentation\pages\settings_page.dart:139:11 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\features\settings\presentation\pages\settings_page.dart:159:11 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\features\settings\presentation\pages\settings_page.dart:167:11 - deprecated_member_use
+

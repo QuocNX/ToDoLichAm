@@ -19,8 +19,12 @@ class AddTaskPage extends GetView<AddTaskController> {
         title: Obx(
           () => Text(
             controller.isEditing
-                ? (isVi ? 'Sửa công việc' : 'Edit task')
-                : (isVi ? 'Thêm công việc' : 'Add task'),
+                ? (settings.locale.value == 'vi'
+                      ? 'Sửa công việc'
+                      : 'Edit task')
+                : (settings.locale.value == 'vi'
+                      ? 'Thêm công việc'
+                      : 'Add task'),
           ),
         ),
         actions: [

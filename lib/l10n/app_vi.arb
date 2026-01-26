@@ -88,5 +88,6 @@
     "restoreData": "Khôi phục dữ liệu",
     "backupSuccess": "Sao lưu thành công",
     "restoreSuccess": "Khôi phục thành công",
-    "error": "Lỗi"
+    "error": "Lỗi",
+    "completedTasks": "Đã hoàn thành"
 }

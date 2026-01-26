@@ -33,7 +33,6 @@ class HomePage extends GetView<HomeController> {
       body: Column(
         children: [
           _buildTabBar(context, settings),
-          _buildSortBar(context, settings),
           Expanded(child: _buildTaskList(context, settings)),
         ],
       ),
@@ -62,24 +61,11 @@ class HomePage extends GetView<HomeController> {
               isSelected: controller.currentTab.value == TabType.favorites,
               onTap: () => controller.switchTab(TabType.favorites),
             ),
-            const SizedBox(width: 16),
             _buildTabItem(
               context: context,
               label: settings.locale.value == 'vi' ? 'Công việc' : 'My Tasks',
               isSelected: controller.currentTab.value == TabType.myTasks,
               onTap: () => controller.switchTab(TabType.myTasks),
-            ),
-            const SizedBox(width: 16),
-            _buildTabItem(
-              context: context,
-              icon: Icons.add,
-              label: settings.locale.value == 'vi'
-                  ? 'Danh sách mới'
-                  : 'New List',
-              isSelected: false,
-              onTap: () {
-                // TODO: Implement new list creation
-              },
             ),
           ],
         ),
@@ -134,88 +120,14 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildSortBar(BuildContext context, SettingsService settings) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Obx(
-            () => Text(
-              controller.currentTab.value == TabType.myTasks
-                  ? (settings.locale.value == 'vi' ? 'Công việc' : 'My Tasks')
-                  : (settings.locale.value == 'vi' ? 'Yêu thích' : 'Favorites'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.sort, size: 20),
-            onPressed: () => _showSortMenu(context, settings),
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert, size: 20),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSortMenu(BuildContext context, SettingsService settings) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              settings.locale.value == 'vi' ? 'Sắp xếp theo' : 'Sort by',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text(
-                settings.locale.value == 'vi' ? 'Theo ngày' : 'By date',
-              ),
-              trailing: Obx(
-                () => controller.sortType.value == SortType.byDate
-                    ? const Icon(Icons.check, color: AppColors.primary)
-                    : const SizedBox.shrink(),
-              ),
-              onTap: () {
-                controller.changeSortType(SortType.byDate);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.sort_by_alpha),
-              title: Text(
-                settings.locale.value == 'vi' ? 'Theo tên' : 'By name',
-              ),
-              trailing: Obx(
-                () => controller.sortType.value == SortType.byName
-                    ? const Icon(Icons.check, color: AppColors.primary)
-                    : const SizedBox.shrink(),
-              ),
-              onTap: () {
-                controller.changeSortType(SortType.byName);
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildTaskList(BuildContext context, SettingsService settings) {
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
+
+      final groupedTasks = controller.groupedTasks;
+      final groupedCompletedTasks = controller.groupedCompletedTasks;
 
       if (controller.tasks.isEmpty) {
         return Center(
@@ -248,43 +160,111 @@ class HomePage extends GetView<HomeController> {
         );
       }
 
-      final groupedTasks = controller.groupedTasks;
-
-      return ListView.builder(
+      return ListView(
         padding: const EdgeInsets.only(bottom: 80),
-        itemCount: groupedTasks.length,
-        itemBuilder: (context, index) {
-          final date = groupedTasks.keys.elementAt(index);
-          final dateTasks = groupedTasks[date]!;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DateGroupHeader(
-                date: date,
-                locale: settings.locale.value,
-                showLunar: settings.showLunar,
-                showSolar: settings.showSolar,
-              ),
-              ...dateTasks.map(
-                (task) => TaskItemWidget(
-                  task: task,
-                  onToggleComplete: () => controller.toggleComplete(task.id),
-                  onToggleStar: () => controller.toggleStar(task.id),
-                  onTap: () async {
-                    final result = await Get.toNamed(
-                      AppRoutes.editTask,
-                      arguments: task,
-                    );
-                    if (result == true) {
-                      controller.loadTasks();
-                    }
-                  },
+        children: [
+          if (groupedTasks.isNotEmpty)
+            Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                initiallyExpanded: true,
+                title: Text(
+                  settings.locale.value == 'vi' ? 'Công việc' : 'Tasks',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
+                children: [
+                  ...groupedTasks.entries.map((entry) {
+                    final date = entry.key;
+                    final dateTasks = entry.value;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DateGroupHeader(
+                          date: date,
+                          locale: settings.locale.value,
+                          showLunar: settings.showLunar,
+                          showSolar: settings.showSolar,
+                        ),
+                        ...dateTasks.map(
+                          (task) => TaskItemWidget(
+                            task: task,
+                            onToggleComplete: () =>
+                                controller.toggleComplete(task.id),
+                            onToggleStar: () => controller.toggleStar(task.id),
+                            onTap: () async {
+                              final result = await Get.toNamed(
+                                AppRoutes.editTask,
+                                arguments: task,
+                              );
+                              if (result == true) {
+                                controller.loadTasks();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ],
               ),
-            ],
-          );
-        },
+            ),
+          if (groupedCompletedTasks.isNotEmpty)
+            Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                title: Text(
+                  settings.locale.value == 'vi' ? 'Đã hoàn thành' : 'Completed',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                children: [
+                  ...groupedCompletedTasks.entries.map((entry) {
+                    final date = entry.key;
+                    final dateTasks = entry.value;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DateGroupHeader(
+                          date: date,
+                          locale: settings.locale.value,
+                          showLunar: settings.showLunar,
+                          showSolar: settings.showSolar,
+                        ),
+                        ...dateTasks.map(
+                          (task) => TaskItemWidget(
+                            task: task,
+                            onToggleComplete: () =>
+                                controller.toggleComplete(task.id),
+                            onToggleStar: () => controller.toggleStar(task.id),
+                            onTap: () async {
+                              final result = await Get.toNamed(
+                                AppRoutes.editTask,
+                                arguments: task,
+                              );
+                              if (result == true) {
+                                controller.loadTasks();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+        ],
       );
     });
   }

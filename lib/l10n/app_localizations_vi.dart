@@ -217,4 +217,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get error => 'Lỗi';
+
+  @override
+  String get completedTasks => 'Đã hoàn thành';
 }

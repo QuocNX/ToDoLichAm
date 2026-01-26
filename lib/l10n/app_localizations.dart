@@ -505,6 +505,12 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Lỗi'**
   String get error;
+
+  /// No description provided for @completedTasks.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã hoàn thành'**
+  String get completedTasks;
 }
 
 class _AppLocalizationsDelegate
