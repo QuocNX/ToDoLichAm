@@ -4,7 +4,6 @@ import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
 
 import 'package:todo_lich_am/common/widgets/first_run_dialog.dart';
-import 'package:todo_lich_am/features/settings/data/services/first_run_service.dart';
 
 /// Tab type for filtering.
 enum TabType { favorites, myTasks }
@@ -33,8 +32,12 @@ class HomeController extends GetxController {
   }
 
   Future<void> _checkFirstRun() async {
-    final firstRunService = Get.find<FirstRunService>();
-    if (firstRunService.isFirstRun) {
+    // If we're still loading, wait a bit
+    if (isLoading.value) {
+      await 1.seconds.delay();
+    }
+
+    if (tasks.isEmpty) {
       final result = await Get.dialog<bool>(
         FirstRunDialog(taskRepository: _repository),
         barrierDismissible: false,
