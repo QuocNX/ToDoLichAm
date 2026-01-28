@@ -26,7 +26,18 @@ class TaskDetailPage extends StatelessWidget {
             // Title
             Text(
               task.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                decoration: task.isCompleted
+                    ? TextDecoration.lineThrough
+                    : null,
+                color: task.isCompleted
+                    ? (Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight)
+                    : null,
+              ),
             ),
             const SizedBox(height: 16),
 

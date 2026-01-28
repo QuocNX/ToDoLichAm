@@ -3,6 +3,7 @@ import 'package:todo_lich_am/features/todo/data/datasources/local/task_local_dat
 import 'package:todo_lich_am/features/todo/data/models/task_model.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
+import 'package:uuid/uuid.dart';
 
 /// Implementation of TaskRepository using local storage.
 class TaskRepositoryImpl implements TaskRepository {
@@ -58,20 +59,44 @@ class TaskRepositoryImpl implements TaskRepository {
       throw Exception('Task not found');
     }
 
-    TaskEntity updatedTask;
-
     if (!task.isCompleted) {
       // Marking as complete
       if (task.repeatType != RepeatType.none) {
-        // Calculate next occurrence for recurring tasks
+        // For recurring tasks:
+        // 1. Create a completed copy for history (current date)
+        final completedTask = TaskEntity(
+          id: const Uuid().v4(), // Generate new ID for history item
+          title: task.title,
+          description: task.description,
+          dueDate: task.dueDate, // Keep original due date for history
+          time: task.time,
+          isLunarCalendar: task.isLunarCalendar,
+          repeatType: RepeatType.none, // History item doesn't repeat
+          repeatInterval: 1,
+          isCompleted: true, // Mark as completed
+          isStarred: task.isStarred,
+          category: task.category,
+          createdAt: task.createdAt,
+          completedAt: DateTime.now(),
+          lunarDay: task.lunarDay,
+          lunarMonth: task.lunarMonth,
+          lunarYear: task.lunarYear,
+        );
+
+        // Save the completed copy
+        await addTask(completedTask);
+
+        // 2. Calculate next occurrence for the original task
         final nextDate = task.isLunarCalendar
             ? LunarCalendarUtils.getNextLunarRecurrence(
                 currentDate: task.dueDate,
                 repeatType: task.repeatType.value,
+                repeatInterval: task.repeatInterval,
               )
             : LunarCalendarUtils.getNextSolarRecurrence(
                 currentDate: task.dueDate,
                 repeatType: task.repeatType.value,
+                repeatInterval: task.repeatInterval,
               );
 
         // Update lunar date info if using lunar calendar
@@ -83,28 +108,32 @@ class TaskRepositoryImpl implements TaskRepository {
           lunarYear = lunar.getYear();
         }
 
-        updatedTask = task.copyWith(
+        // Reschedule the original task
+        final updatedTask = task.copyWith(
           dueDate: nextDate,
-          isCompleted: false,
-          completedAt: DateTime.now(),
           lunarDay: lunarDay,
           lunarMonth: lunarMonth,
           lunarYear: lunarYear,
+          // Keep other fields (isCompleted = false)
         );
+
+        await updateTask(updatedTask);
+        return updatedTask;
       } else {
         // Non-recurring task, just mark complete
-        updatedTask = task.copyWith(
+        final updatedTask = task.copyWith(
           isCompleted: true,
           completedAt: DateTime.now(),
         );
+        await updateTask(updatedTask);
+        return updatedTask;
       }
     } else {
-      // Marking as incomplete
-      updatedTask = task.copyWith(isCompleted: false, completedAt: null);
+      // Marking as incomplete (unchecking from history)
+      final updatedTask = task.copyWith(isCompleted: false, completedAt: null);
+      await updateTask(updatedTask);
+      return updatedTask;
     }
-
-    await updateTask(updatedTask);
-    return updatedTask;
   }
 
   @override
@@ -117,5 +146,15 @@ class TaskRepositoryImpl implements TaskRepository {
     final updatedTask = task.copyWith(isStarred: !task.isStarred);
     await updateTask(updatedTask);
     return updatedTask;
+  }
+
+  @override
+  Future<void> deleteAllTasks() async {
+    await _localDataSource.clearAllTasks();
+  }
+
+  @override
+  Future<void> deleteCompletedTasks() async {
+    await _localDataSource.clearCompletedTasks();
   }
 }

@@ -5,6 +5,8 @@ import 'package:todo_lich_am/core/constants/app_strings.dart';
 import 'package:todo_lich_am/features/settings/data/services/backup_service.dart';
 import 'package:todo_lich_am/features/settings/data/services/settings_service.dart';
 import 'package:todo_lich_am/routes/app_routes.dart';
+import 'package:todo_lich_am/common/widgets/delete_tasks_dialog.dart';
+import 'package:todo_lich_am/features/todo/presentation/controllers/home_controller.dart';
 
 /// Settings page for configuring app preferences.
 class SettingsPage extends StatelessWidget {
@@ -62,10 +64,35 @@ class SettingsPage extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Get.toNamed(AppRoutes.about),
             ),
+
+            const Divider(),
+
+            // Clear data section
+            _buildSectionHeader(context, isVi ? 'Dữ liệu' : 'Data'),
+            ListTile(
+              leading: const Icon(Icons.delete_sweep, color: Colors.red),
+              title: Text(isVi ? 'Xóa toàn bộ dữ liệu' : 'Clear all data'),
+              onTap: () => _showDeleteDialog(context),
+            ),
           ],
         );
       }),
     );
+  }
+
+  void _showDeleteDialog(BuildContext context) async {
+    final result = await Get.dialog<Map<String, bool>>(
+      const DeleteTasksDialog(),
+    );
+
+    if (result != null) {
+      final homeController = Get.find<HomeController>();
+      if (result['deleteAll'] == true) {
+        await homeController.deleteAllTasks();
+      } else if (result['deleteCompleted'] == true) {
+        await homeController.deleteCompletedTasks();
+      }
+    }
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {

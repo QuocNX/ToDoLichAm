@@ -48,6 +48,9 @@ class TaskModel extends HiveObject {
   @HiveField(14)
   final int? lunarYear;
 
+  @HiveField(15)
+  final int repeatInterval;
+
   TaskModel({
     required this.id,
     required this.title,
@@ -64,6 +67,7 @@ class TaskModel extends HiveObject {
     this.lunarDay,
     this.lunarMonth,
     this.lunarYear,
+    this.repeatInterval = 1,
   });
 
   /// Converts from domain entity to data model.
@@ -84,6 +88,7 @@ class TaskModel extends HiveObject {
       lunarDay: entity.lunarDay,
       lunarMonth: entity.lunarMonth,
       lunarYear: entity.lunarYear,
+      repeatInterval: entity.repeatInterval,
     );
   }
 
@@ -105,6 +110,7 @@ class TaskModel extends HiveObject {
       lunarDay: lunarDay,
       lunarMonth: lunarMonth,
       lunarYear: lunarYear,
+      repeatInterval: repeatInterval,
     );
   }
 }
@@ -136,13 +142,14 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       lunarDay: fields[12] as int?,
       lunarMonth: fields[13] as int?,
       lunarYear: fields[14] as int?,
+      repeatInterval: fields[15] as int? ?? 1,
     );
   }
 
   @override
   void write(BinaryWriter writer, TaskModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -172,6 +179,8 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..writeByte(13)
       ..write(obj.lunarMonth)
       ..writeByte(14)
-      ..write(obj.lunarYear);
+      ..write(obj.lunarYear)
+      ..writeByte(15)
+      ..write(obj.repeatInterval);
   }
 }

@@ -3,6 +3,9 @@ import 'package:todo_lich_am/core/utils/lunar_calendar_utils.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
 
+import 'package:todo_lich_am/common/widgets/first_run_dialog.dart';
+import 'package:todo_lich_am/features/settings/data/services/first_run_service.dart';
+
 /// Tab type for filtering.
 enum TabType { favorites, myTasks }
 
@@ -23,14 +26,36 @@ class HomeController extends GetxController {
     loadTasks();
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    _checkFirstRun();
+  }
+
+  Future<void> _checkFirstRun() async {
+    final firstRunService = Get.find<FirstRunService>();
+    if (firstRunService.isFirstRun) {
+      final result = await Get.dialog<bool>(
+        FirstRunDialog(taskRepository: _repository),
+        barrierDismissible: false,
+      );
+
+      if (result == true) {
+        // Add a tiny delay to ensure dialog is closed and Hive is ready
+        await Future.delayed(const Duration(milliseconds: 100));
+        await loadTasks();
+      }
+    }
+  }
+
   /// Loads tasks from repository.
   Future<void> loadTasks() async {
     isLoading.value = true;
     try {
       if (currentTab.value == TabType.favorites) {
-        tasks.value = await _repository.getStarredTasks();
+        tasks.assignAll(await _repository.getStarredTasks());
       } else {
-        tasks.value = await _repository.getAllTasks();
+        tasks.assignAll(await _repository.getAllTasks());
       }
       _sortTasks();
     } finally {
@@ -95,12 +120,10 @@ class HomeController extends GetxController {
   /// Toggles task completion.
   Future<void> toggleComplete(String taskId) async {
     try {
-      final updatedTask = await _repository.toggleComplete(taskId);
-      final index = tasks.indexWhere((t) => t.id == taskId);
-      if (index != -1) {
-        tasks[index] = updatedTask;
-        tasks.refresh();
-      }
+      await _repository.toggleComplete(taskId);
+      // Reload tasks to reflect potential new history items (for recurring tasks)
+      // or rescheduled tasks
+      loadTasks();
     } catch (e) {
       Get.snackbar('Lỗi', 'Không thể cập nhật công việc');
     }
@@ -156,6 +179,34 @@ class HomeController extends GetxController {
       return locale == 'vi' ? 'Còn $days ngày' : '$days days left';
     } else {
       return locale == 'vi' ? 'Quá hạn ${-days} ngày' : '${-days} days overdue';
+    }
+  }
+
+  /// Deletes all tasks from storage.
+  Future<void> deleteAllTasks() async {
+    try {
+      isLoading.value = true;
+      await _repository.deleteAllTasks();
+      tasks.clear();
+      Get.snackbar('Thành công', 'Đã xóa tất cả công việc');
+    } catch (e) {
+      Get.snackbar('Lỗi', 'Không thể xóa công việc');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Deletes only completed tasks from storage.
+  Future<void> deleteCompletedTasks() async {
+    try {
+      isLoading.value = true;
+      await _repository.deleteCompletedTasks();
+      await loadTasks();
+      Get.snackbar('Thành công', 'Đã xóa các việc đã hoàn thành');
+    } catch (e) {
+      Get.snackbar('Lỗi', 'Không thể xóa công việc');
+    } finally {
+      isLoading.value = false;
     }
   }
 }

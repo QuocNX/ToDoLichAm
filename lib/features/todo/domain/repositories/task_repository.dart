@@ -28,4 +28,10 @@ abstract class TaskRepository {
 
   /// Toggles task starred status.
   Future<TaskEntity> toggleStar(String id);
+
+  /// Deletes all tasks from storage.
+  Future<void> deleteAllTasks();
+
+  /// Deletes only completed tasks from storage.
+  Future<void> deleteCompletedTasks();
 }

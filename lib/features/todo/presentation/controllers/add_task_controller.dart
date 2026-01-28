@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
+import 'package:todo_lich_am/common/widgets/lunar_date_picker.dart';
 import 'package:todo_lich_am/core/constants/app_colors.dart';
 import 'package:todo_lich_am/core/utils/lunar_calendar_utils.dart';
 import 'package:todo_lich_am/features/settings/data/services/settings_service.dart';
@@ -16,12 +17,14 @@ class AddTaskController extends GetxController {
   // Form controllers
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  final repeatIntervalController = TextEditingController(text: '1');
 
   // Observable state
   final Rx<DateTime> selectedDate = DateTime.now().obs;
   final Rx<TimeOfDay?> selectedTime = Rx<TimeOfDay?>(null);
   final RxBool isLunarCalendar = false.obs;
   final Rx<RepeatType> repeatType = RepeatType.none.obs;
+  final RxInt repeatInterval = 1.obs;
   final RxBool isStarred = false.obs;
   final RxBool isLoading = false.obs;
 
@@ -48,6 +51,13 @@ class AddTaskController extends GetxController {
     // Listen to date and calendar type changes
     ever(selectedDate, (_) => _updateDateDisplays());
     ever(isLunarCalendar, (_) => _updateDateDisplays());
+
+    repeatIntervalController.addListener(() {
+      final val = int.tryParse(repeatIntervalController.text);
+      if (val != null) {
+        repeatInterval.value = val;
+      }
+    });
   }
 
   void _loadTaskData(TaskEntity task) {
@@ -62,6 +72,8 @@ class AddTaskController extends GetxController {
     }
     isLunarCalendar.value = task.isLunarCalendar;
     repeatType.value = task.repeatType;
+    repeatInterval.value = task.repeatInterval;
+    repeatIntervalController.text = task.repeatInterval.toString();
     isStarred.value = task.isStarred;
   }
 
@@ -79,9 +91,16 @@ class AddTaskController extends GetxController {
     final settings = Get.find<SettingsService>();
 
     if (isLunarCalendar.value) {
-      // For lunar calendar, we'll use a regular date picker
-      // but interpret the selection as lunar date
-      await _showLunarDatePicker(context);
+      await showModalBottomSheet(
+        context: context,
+        builder: (context) => LunarDatePicker(
+          initialDate: selectedDate.value,
+          locale: settings.locale.value,
+          onDateChanged: (date) {
+            selectedDate.value = date;
+          },
+        ),
+      );
     } else {
       final picked = await showDatePicker(
         context: context,
@@ -93,21 +112,6 @@ class AddTaskController extends GetxController {
       if (picked != null) {
         selectedDate.value = picked;
       }
-    }
-  }
-
-  Future<void> _showLunarDatePicker(BuildContext context) async {
-    // For simplicity, use solar picker and show lunar equivalent
-    // A more sophisticated implementation would use a custom lunar picker
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate.value,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-      helpText: 'Chọn ngày (sẽ chuyển sang âm lịch)',
-    );
-    if (picked != null) {
-      selectedDate.value = picked;
     }
   }
 
@@ -169,6 +173,7 @@ class AddTaskController extends GetxController {
         time: taskTime,
         isLunarCalendar: isLunarCalendar.value,
         repeatType: repeatType.value,
+        repeatInterval: int.tryParse(repeatIntervalController.text) ?? 1,
         isCompleted: editingTask?.isCompleted ?? false,
         isStarred: isStarred.value,
         category: editingTask?.category ?? 'default',
@@ -230,6 +235,7 @@ class AddTaskController extends GetxController {
   void onClose() {
     titleController.dispose();
     descriptionController.dispose();
+    repeatIntervalController.dispose();
     super.onClose();
   }
 }

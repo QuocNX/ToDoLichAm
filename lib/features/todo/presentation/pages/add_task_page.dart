@@ -313,44 +313,78 @@ class AddTaskPage extends GetView<AddTaskController> {
   Widget _buildRepeatSelector(BuildContext context, bool isVi) {
     final repeatOptions = [
       (RepeatType.none, isVi ? 'Không lặp' : 'No repeat'),
-      (RepeatType.daily, isVi ? 'Hàng ngày' : 'Daily'),
-      (RepeatType.weekly, isVi ? 'Hàng tuần' : 'Weekly'),
-      (RepeatType.monthly, isVi ? 'Hàng tháng' : 'Monthly'),
-      (RepeatType.yearly, isVi ? 'Hàng năm' : 'Yearly'),
+      (RepeatType.daily, isVi ? 'Ngày' : 'Days'),
+      (RepeatType.weekly, isVi ? 'Tuần' : 'Weeks'),
+      (RepeatType.monthly, isVi ? 'Tháng' : 'Months'),
+      (RepeatType.yearly, isVi ? 'Năm' : 'Years'),
     ];
 
     return Obx(
-      () => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.darkSurfaceVariant
-              : AppColors.lightSurfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: DropdownButton<RepeatType>(
-          value: controller.repeatType.value,
-          isExpanded: true,
-          underline: const SizedBox(),
-          icon: const Icon(Icons.chevron_right),
-          items: repeatOptions.map((option) {
-            return DropdownMenuItem<RepeatType>(
-              value: option.$1,
-              child: Row(
-                children: [
-                  const Icon(Icons.repeat, size: 20),
-                  const SizedBox(width: 12),
-                  Text(option.$2),
-                ],
+      () => Row(
+        children: [
+          // Interval input
+          if (controller.repeatType.value != RepeatType.none) ...[
+            SizedBox(
+              width: 80,
+              child: TextField(
+                controller: controller.repeatIntervalController,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.darkSurfaceVariant
+                      : AppColors.lightSurfaceVariant,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                ),
               ),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              controller.repeatType.value = value;
-            }
-          },
-        ),
+            ),
+            const SizedBox(width: 12),
+          ],
+
+          // Repeat type dropdown
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkSurfaceVariant
+                    : AppColors.lightSurfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButton<RepeatType>(
+                value: controller.repeatType.value,
+                isExpanded: true,
+                underline: const SizedBox(),
+                icon: const Icon(Icons.chevron_right),
+                items: repeatOptions.map((option) {
+                  return DropdownMenuItem<RepeatType>(
+                    value: option.$1,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.repeat, size: 20),
+                        const SizedBox(width: 12),
+                        Text(option.$2),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    controller.repeatType.value = value;
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

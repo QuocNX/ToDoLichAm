@@ -28,6 +28,10 @@ class HomePage extends GetView<HomeController> {
             icon: const Icon(Icons.settings),
             onPressed: () => Get.toNamed(AppRoutes.settings),
           ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => Get.toNamed(AppRoutes.about),
+          ),
         ],
       ),
       body: Column(
@@ -194,9 +198,20 @@ class HomePage extends GetView<HomeController> {
                         ...dateTasks.map(
                           (task) => TaskItemWidget(
                             task: task,
+                            locale: settings.locale.value,
                             onToggleComplete: () =>
                                 controller.toggleComplete(task.id),
                             onToggleStar: () => controller.toggleStar(task.id),
+                            onDelete: () => controller.deleteTask(task.id),
+                            onEdit: () async {
+                              final result = await Get.toNamed(
+                                AppRoutes.editTask,
+                                arguments: task,
+                              );
+                              if (result == true) {
+                                controller.loadTasks();
+                              }
+                            },
                             onTap: () async {
                               final result = await Get.toNamed(
                                 AppRoutes.editTask,
@@ -244,9 +259,20 @@ class HomePage extends GetView<HomeController> {
                         ...dateTasks.map(
                           (task) => TaskItemWidget(
                             task: task,
+                            locale: settings.locale.value,
                             onToggleComplete: () =>
                                 controller.toggleComplete(task.id),
                             onToggleStar: () => controller.toggleStar(task.id),
+                            onDelete: () => controller.deleteTask(task.id),
+                            onEdit: () async {
+                              final result = await Get.toNamed(
+                                AppRoutes.editTask,
+                                arguments: task,
+                              );
+                              if (result == true) {
+                                controller.loadTasks();
+                              }
+                            },
                             onTap: () async {
                               final result = await Get.toNamed(
                                 AppRoutes.editTask,

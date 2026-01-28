@@ -46,6 +46,7 @@ class TaskEntity {
   final DateTime? time;
   final bool isLunarCalendar;
   final RepeatType repeatType;
+  final int repeatInterval;
   final bool isCompleted;
   final bool isStarred;
   final String category;
@@ -63,6 +64,7 @@ class TaskEntity {
     this.time,
     this.isLunarCalendar = false,
     this.repeatType = RepeatType.none,
+    this.repeatInterval = 1,
     this.isCompleted = false,
     this.isStarred = false,
     this.category = 'default',
@@ -81,6 +83,7 @@ class TaskEntity {
     DateTime? time,
     bool? isLunarCalendar,
     RepeatType? repeatType,
+    int? repeatInterval,
     bool? isCompleted,
     bool? isStarred,
     String? category,
@@ -98,6 +101,7 @@ class TaskEntity {
       time: time ?? this.time,
       isLunarCalendar: isLunarCalendar ?? this.isLunarCalendar,
       repeatType: repeatType ?? this.repeatType,
+      repeatInterval: repeatInterval ?? this.repeatInterval,
       isCompleted: isCompleted ?? this.isCompleted,
       isStarred: isStarred ?? this.isStarred,
       category: category ?? this.category,

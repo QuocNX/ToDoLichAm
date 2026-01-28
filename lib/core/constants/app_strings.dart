@@ -14,6 +14,7 @@ class AppStrings {
   static const String keyLocale = 'locale';
   static const String keyThemeMode = 'themeMode';
   static const String keyCalendarMode = 'calendarMode';
+  static const String keyFirstRun = 'isFirstRun';
 
   // Calendar modes
   static const String calendarModeLunar = 'lunar';

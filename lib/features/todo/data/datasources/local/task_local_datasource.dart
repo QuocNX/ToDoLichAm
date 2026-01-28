@@ -54,6 +54,22 @@ class TaskLocalDataSource {
     await box.delete(id);
   }
 
+  /// Deletes all tasks from local storage.
+  Future<void> clearAllTasks() async {
+    final box = await taskBox;
+    await box.clear();
+  }
+
+  /// Deletes only completed tasks from local storage.
+  Future<void> clearCompletedTasks() async {
+    final box = await taskBox;
+    final keysToDelete = box.values
+        .where((task) => task.isCompleted)
+        .map((task) => task.id)
+        .toList();
+    await box.deleteAll(keysToDelete);
+  }
+
   /// Closes the box.
   Future<void> close() async {
     if (_taskBox != null && _taskBox!.isOpen) {

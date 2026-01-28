@@ -70,22 +70,38 @@ class DateGroupHeader extends StatelessWidget {
   }
 
   String _getDateText() {
+    String? relativeLabel;
     if (LunarCalendarUtils.isToday(date)) {
-      return locale == 'vi' ? 'Hôm nay' : 'Today';
+      relativeLabel = locale == 'vi' ? 'Hôm nay' : 'Today';
+    } else if (LunarCalendarUtils.isYesterday(date)) {
+      relativeLabel = locale == 'vi' ? 'Hôm qua' : 'Yesterday';
+    } else if (LunarCalendarUtils.isTomorrow(date)) {
+      relativeLabel = locale == 'vi' ? 'Ngày mai' : 'Tomorrow';
     }
 
     final lunar = LunarCalendarUtils.solarToLunar(date);
     final dayOfWeek = _getDayOfWeek(date.weekday);
-    final solarStr = '$dayOfWeek, ${date.day} thg ${date.month}';
-    final lunarStr = '${lunar.getDay()}/${lunar.getMonth()}';
 
+    final sDay = date.day.toString().padLeft(2, '0');
+    final sMonth = date.month.toString().padLeft(2, '0');
+    final solarStr = '$dayOfWeek, $sDay/$sMonth/${date.year}';
+
+    final lDay = lunar.getDay().toString().padLeft(2, '0');
+    final lMonth = lunar.getMonth().toString().padLeft(2, '0');
+    final lYear = lunar.getYear();
+    final ganZhi = LunarCalendarUtils.getVietnameseGanZhiYear(lYear);
+    final lunarStr = '$lDay/$lMonth/$lYear - $ganZhi';
+
+    String dateStr;
     if (showLunar && showSolar) {
-      return '$solarStr (Âm: $lunarStr)';
+      dateStr = '$solarStr ($lunarStr)';
     } else if (showLunar) {
-      return '$dayOfWeek, $lunarStr Âm';
+      dateStr = '$dayOfWeek, $lunarStr Âm';
     } else {
-      return solarStr;
+      dateStr = solarStr;
     }
+
+    return relativeLabel != null ? '$relativeLabel, $dateStr' : dateStr;
   }
 
   String _getDayOfWeek(int weekday) {

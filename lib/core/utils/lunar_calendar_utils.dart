@@ -33,7 +33,7 @@ class LunarCalendarUtils {
   }
 
   /// Formats solar date with lunar date in Vietnamese.
-  /// Returns format like "CN, 1 thg 2 (Âm: 4/1)"
+  /// Returns format like "CN, 1 thg 2 (4/1)"
   static String formatDateWithLunar(
     DateTime solarDate, {
     required String locale,
@@ -46,7 +46,7 @@ class LunarCalendarUtils {
     final lunarStr = '${lunar.getDay()}/${lunar.getMonth()}';
 
     if (showLunar && showSolar) {
-      return '$solarStr (Âm: $lunarStr)';
+      return '$solarStr ($lunarStr)';
     } else if (showLunar) {
       return '$dayOfWeek, $lunarStr Âm';
     } else {
@@ -73,6 +73,22 @@ class LunarCalendarUtils {
         date.day == now.day;
   }
 
+  /// Checks if a date is yesterday.
+  static bool isYesterday(DateTime date) {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    return date.year == yesterday.year &&
+        date.month == yesterday.month &&
+        date.day == yesterday.day;
+  }
+
+  /// Checks if a date is tomorrow.
+  static bool isTomorrow(DateTime date) {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    return date.year == tomorrow.year &&
+        date.month == tomorrow.month &&
+        date.day == tomorrow.day;
+  }
+
   /// Calculates days remaining until a date.
   static int daysRemaining(DateTime date) {
     final now = DateTime.now();
@@ -85,22 +101,23 @@ class LunarCalendarUtils {
   static DateTime getNextLunarRecurrence({
     required DateTime currentDate,
     required String repeatType,
+    int repeatInterval = 1,
   }) {
     final lunar = solarToLunar(currentDate);
 
     switch (repeatType) {
       case 'daily':
-        return currentDate.add(const Duration(days: 1));
+        return currentDate.add(Duration(days: 1 * repeatInterval));
 
       case 'weekly':
-        return currentDate.add(const Duration(days: 7));
+        return currentDate.add(Duration(days: 7 * repeatInterval));
 
       case 'monthly':
         // Next lunar month, same day
-        var nextMonth = lunar.getMonth() + 1;
+        var nextMonth = lunar.getMonth() + repeatInterval;
         var nextYear = lunar.getYear();
-        if (nextMonth > 12) {
-          nextMonth = 1;
+        while (nextMonth > 12) {
+          nextMonth -= 12;
           nextYear++;
         }
         return lunarToSolar(
@@ -112,7 +129,7 @@ class LunarCalendarUtils {
       case 'yearly':
         // Next lunar year, same month and day
         return lunarToSolar(
-          year: lunar.getYear() + 1,
+          year: lunar.getYear() + repeatInterval,
           month: lunar.getMonth(),
           day: lunar.getDay(),
         );
@@ -126,19 +143,20 @@ class LunarCalendarUtils {
   static DateTime getNextSolarRecurrence({
     required DateTime currentDate,
     required String repeatType,
+    int repeatInterval = 1,
   }) {
     switch (repeatType) {
       case 'daily':
-        return currentDate.add(const Duration(days: 1));
+        return currentDate.add(Duration(days: 1 * repeatInterval));
 
       case 'weekly':
-        return currentDate.add(const Duration(days: 7));
+        return currentDate.add(Duration(days: 7 * repeatInterval));
 
       case 'monthly':
-        var nextMonth = currentDate.month + 1;
+        var nextMonth = currentDate.month + repeatInterval;
         var nextYear = currentDate.year;
-        if (nextMonth > 12) {
-          nextMonth = 1;
+        while (nextMonth > 12) {
+          nextMonth -= 12;
           nextYear++;
         }
         // Handle edge case for months with fewer days
@@ -150,7 +168,7 @@ class LunarCalendarUtils {
 
       case 'yearly':
         return DateTime(
-          currentDate.year + 1,
+          currentDate.year + repeatInterval,
           currentDate.month,
           currentDate.day,
         );
@@ -158,5 +176,43 @@ class LunarCalendarUtils {
       default:
         return currentDate;
     }
+  }
+
+  /// Gets the Vietnamese GanZhi (Can Chi) name for a lunar year.
+  static String getVietnameseGanZhiYear(int year) {
+    const stems = [
+      'Giáp',
+      'Ất',
+      'Bính',
+      'Đinh',
+      'Mậu',
+      'Kỷ',
+      'Canh',
+      'Tân',
+      'Nhâm',
+      'Quý',
+    ];
+    const branches = [
+      'Tý',
+      'Sửu',
+      'Dần',
+      'Mão',
+      'Thìn',
+      'Tỵ',
+      'Ngọ',
+      'Mùi',
+      'Thân',
+      'Dậu',
+      'Tuất',
+      'Hợi',
+    ];
+
+    // The year 4 AD (solar) was a Giáp Tý year in some systems,
+    // but Chinese/Lunar years are cycles of 60.
+    // Standard formula for lunar year name:
+    final stemIndex = (year - 4) % 10;
+    final branchIndex = (year - 4) % 12;
+
+    return '${stems[stemIndex]} ${branches[branchIndex]}';
   }
 }
