@@ -98,47 +98,36 @@ class TaskItemWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Sun/Moon icon row above title
+                    // Icon + Task title inline
                     Row(
                       children: [
                         Icon(
                           task.isLunarCalendar
                               ? Icons.nights_stay_outlined
                               : Icons.wb_sunny_outlined,
-                          size: 14,
+                          size: 16,
                           color: task.isLunarCalendar
                               ? Colors.indigo
                               : Colors.orange,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          task.isLunarCalendar
-                              ? (locale == 'vi' ? 'Âm lịch' : 'Lunar')
-                              : (locale == 'vi' ? 'Dương lịch' : 'Solar'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDark
-                                ? AppColors.textSecondaryDark
-                                : AppColors.textSecondaryLight,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            task.title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              decoration: task.isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                              color: task.isCompleted
+                                  ? (isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondaryLight)
+                                  : null,
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 2),
-                    // Task title
-                    Text(
-                      task.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        decoration: task.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
-                        color: task.isCompleted
-                            ? (isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight)
-                            : null,
-                      ),
                     ),
                     // Time and repeat info
                     if (task.time != null || task.repeatType != RepeatType.none)
