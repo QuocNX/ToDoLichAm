@@ -9,6 +9,9 @@ import 'package:todo_lich_am/common/widgets/first_run_dialog.dart';
 /// Tab type for filtering.
 enum TabType { favorites, myTasks }
 
+/// Calendar type for filtering.
+enum CalendarFilter { all, solar, lunar }
+
 /// Controller for HomePage.
 class HomeController extends GetxController {
   final TaskRepository _repository;
@@ -19,6 +22,7 @@ class HomeController extends GetxController {
   final RxList<TaskEntity> tasks = <TaskEntity>[].obs;
   final RxBool isLoading = true.obs;
   final Rx<TabType> currentTab = TabType.myTasks.obs;
+  final Rx<CalendarFilter> currentFilter = CalendarFilter.all.obs;
 
   @override
   void onInit() {
@@ -98,6 +102,14 @@ class HomeController extends GetxController {
     }
   }
 
+  /// Switches filter.
+  void setFilter(CalendarFilter filter) {
+    if (currentFilter.value != filter) {
+      currentFilter.value = filter;
+      update();
+    }
+  }
+
   void _sortTasks() {
     tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
@@ -107,6 +119,11 @@ class HomeController extends GetxController {
     final Map<DateTime, List<TaskEntity>> grouped = {};
 
     for (final task in tasks.where((t) => !t.isCompleted)) {
+      if (currentFilter.value == CalendarFilter.solar && task.isLunarCalendar)
+        continue;
+      if (currentFilter.value == CalendarFilter.lunar && !task.isLunarCalendar)
+        continue;
+
       final dateKey = DateTime(
         task.dueDate.year,
         task.dueDate.month,
@@ -128,6 +145,11 @@ class HomeController extends GetxController {
     final Map<DateTime, List<TaskEntity>> grouped = {};
 
     for (final task in tasks.where((t) => t.isCompleted)) {
+      if (currentFilter.value == CalendarFilter.solar && task.isLunarCalendar)
+        continue;
+      if (currentFilter.value == CalendarFilter.lunar && !task.isLunarCalendar)
+        continue;
+
       final dateKey = DateTime(
         task.dueDate.year,
         task.dueDate.month,

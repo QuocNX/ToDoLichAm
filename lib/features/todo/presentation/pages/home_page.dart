@@ -123,10 +123,107 @@ class HomePage extends GetView<HomeController> {
               isSelected: controller.currentTab.value == TabType.myTasks,
               onTap: () => controller.switchTab(TabType.myTasks),
             ),
+            const Spacer(),
+            _buildFilterButton(context, settings),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildFilterButton(BuildContext context, SettingsService settings) {
+    final isVi = settings.locale.value == 'vi';
+    return PopupMenuButton<CalendarFilter>(
+      initialValue: controller.currentFilter.value,
+      onSelected: controller.setFilter,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: CalendarFilter.all,
+          child: Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(isVi ? 'Tất cả' : 'All'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: CalendarFilter.solar,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.wb_sunny_outlined,
+                size: 18,
+                color: Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              Text(isVi ? 'Dương lịch' : 'Solar'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: CalendarFilter.lunar,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.nights_stay_outlined,
+                size: 18,
+                color: Colors.indigo,
+              ),
+              const SizedBox(width: 8),
+              Text(isVi ? 'Âm lịch' : 'Lunar'),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: controller.currentFilter.value != CalendarFilter.all
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: controller.currentFilter.value != CalendarFilter.all
+                ? AppColors.primary
+                : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.filter_list,
+              size: 20,
+              color: controller.currentFilter.value != CalendarFilter.all
+                  ? AppColors.primary
+                  : Colors.grey.shade600,
+            ),
+            if (controller.currentFilter.value != CalendarFilter.all) ...[
+              const SizedBox(width: 4),
+              Text(
+                _getFilterLabel(controller.currentFilter.value, isVi),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getFilterLabel(CalendarFilter filter, bool isVi) {
+    switch (filter) {
+      case CalendarFilter.solar:
+        return isVi ? 'Dương' : 'Solar';
+      case CalendarFilter.lunar:
+        return isVi ? 'Âm' : 'Lunar';
+      default:
+        return '';
+    }
   }
 
   Widget _buildTabItem({

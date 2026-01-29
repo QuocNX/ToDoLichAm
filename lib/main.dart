@@ -5,6 +5,7 @@ import 'package:todo_lich_am/app.dart';
 import 'package:todo_lich_am/features/settings/data/services/settings_service.dart';
 import 'package:todo_lich_am/features/todo/data/models/task_model.dart';
 import 'package:todo_lich_am/features/settings/data/services/first_run_service.dart';
+import 'package:todo_lich_am/core/services/notification_service.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
@@ -18,6 +19,9 @@ void main() async {
 
   // Initialize global services
   await Get.putAsync<SettingsService>(() async => SettingsService().init());
+  await Get.putAsync<NotificationService>(
+    () async => NotificationService().init(),
+  );
   await Get.putAsync<FirstRunService>(() async => FirstRunService().init());
 
   await SentryFlutter.init((options) {

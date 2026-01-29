@@ -3,6 +3,8 @@ import 'package:todo_lich_am/features/todo/data/datasources/local/task_local_dat
 import 'package:todo_lich_am/features/todo/data/models/task_model.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
+import 'package:get/get.dart';
+import 'package:todo_lich_am/core/services/notification_service.dart';
 import 'package:uuid/uuid.dart';
 
 /// Implementation of TaskRepository using local storage.
@@ -39,23 +41,29 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<void> addTask(TaskEntity task) async {
     final model = TaskModel.fromEntity(task);
     await _localDataSource.saveTask(model);
+    _scheduleNotification(task);
   }
 
   @override
   Future<void> addAllTasks(List<TaskEntity> tasks) async {
     final models = tasks.map((t) => TaskModel.fromEntity(t)).toList();
     await _localDataSource.saveAllTasks(models);
+    for (final task in tasks) {
+      _scheduleNotification(task);
+    }
   }
 
   @override
   Future<void> updateTask(TaskEntity task) async {
     final model = TaskModel.fromEntity(task);
     await _localDataSource.saveTask(model);
+    _scheduleNotification(task);
   }
 
   @override
   Future<void> deleteTask(String id) async {
     await _localDataSource.deleteTask(id);
+    _cancelNotification(id);
   }
 
   @override
@@ -82,7 +90,8 @@ class TaskRepositoryImpl implements TaskRepository {
           isCompleted: true, // Mark as completed
           isStarred: task.isStarred,
           category: task.category,
-          createdAt: task.createdAt,
+          createdAt: task
+              .createdAt, // Keep original creation time? Or now? Usually original.
           completedAt: DateTime.now(),
           lunarDay: task.lunarDay,
           lunarMonth: task.lunarMonth,
@@ -157,10 +166,31 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Future<void> deleteAllTasks() async {
     await _localDataSource.clearAllTasks();
+    if (Get.isRegistered<NotificationService>()) {
+      await Get.find<NotificationService>().cancelAll();
+    }
   }
 
   @override
   Future<void> deleteCompletedTasks() async {
+    // We should probably get the list of completed tasks ID first to cancel notifications?
+    // But completed tasks naturally don't have pending notifications because
+    // _scheduleNotification checks isCompleted.
+    // However, if we delete them, we don't need to do anything specific for notifications
+    // as they shouldn't exist.
     await _localDataSource.clearCompletedTasks();
+  }
+
+  // Helper methods for accessing NotificationService safely
+  void _scheduleNotification(TaskEntity task) {
+    if (Get.isRegistered<NotificationService>()) {
+      Get.find<NotificationService>().scheduleTaskNotification(task);
+    }
+  }
+
+  void _cancelNotification(String taskId) {
+    if (Get.isRegistered<NotificationService>()) {
+      Get.find<NotificationService>().cancelTaskNotification(taskId);
+    }
   }
 }
