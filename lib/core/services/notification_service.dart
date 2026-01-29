@@ -18,6 +18,7 @@ class NotificationService extends GetxService {
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
+    // v17: Positional argument
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
     await _requestPermissions();
@@ -36,32 +37,24 @@ class NotificationService extends GetxService {
   }
 
   Future<void> scheduleTaskNotification(TaskEntity task) async {
-    // Cancel existing notification for this task first to avoid duplicates
     await cancelTaskNotification(task.id);
 
     if (task.isCompleted) return;
 
-    // Calculate the trigger date time
     DateTime now = DateTime.now();
     DateTime triggerDate;
 
     if (task.isLunarCalendar &&
         task.lunarDay != null &&
         task.lunarMonth != null) {
-      // Handle Lunar Date
-      // Try to get solar date for current year
       try {
         triggerDate = LunarCalendarUtils.lunarToSolar(
           day: task.lunarDay!,
           month: task.lunarMonth!,
           year: now.year,
-          isLeapMonth: false, // Assuming not leap for simplicity or need check
+          isLeapMonth: false,
         );
-
-        // If the date has passed, use next year (simple logic, improves later)
-        // But we also need to respect the task time.
         DateTime triggerDateTime = _combineDateAndTime(triggerDate, task.time);
-
         if (triggerDateTime.isBefore(now)) {
           triggerDate = LunarCalendarUtils.lunarToSolar(
             day: task.lunarDay!,
@@ -71,30 +64,26 @@ class NotificationService extends GetxService {
           );
         }
       } catch (e) {
-        // Fallback or skip if conversion fails
         return;
       }
     } else {
-      // Handle Solar Date
       triggerDate = task.dueDate;
     }
 
-    // Combine date with time (or start of day if no time)
     DateTime scheduledDate = _combineDateAndTime(triggerDate, task.time);
 
-    // If the time is in the past, don't schedule (or schedule for next occurrence if recurring - simplified for now)
     if (scheduledDate.isBefore(now)) return;
 
-    // Use a unique ID based on task ID hash
     int notificationId = task.id.hashCode;
 
+    // v17: Positional arguments for id, title, body, scheduledDate, notificationDetails
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       notificationId,
       task.title,
       task.isLunarCalendar
           ? 'Lịch âm: ${task.lunarDay}/${task.lunarMonth}'
           : 'Lịch dương: ${triggerDate.day}/${triggerDate.month}',
-      tz.TZDateTime.from(scheduledDate, tz.local),
+      tz.TZDateTime.from(scheduledDate, tz.UTC),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'task_channel_id',
@@ -114,12 +103,12 @@ class NotificationService extends GetxService {
     if (time != null) {
       return DateTime(date.year, date.month, date.day, time.hour, time.minute);
     } else {
-      // Getting first second of the day as requested: 00:00:01
       return DateTime(date.year, date.month, date.day, 0, 0, 1);
     }
   }
 
   Future<void> cancelTaskNotification(String taskId) async {
+    // v17: Positional argument
     await _flutterLocalNotificationsPlugin.cancel(taskId.hashCode);
   }
 
