@@ -26,10 +26,19 @@ class HomePage extends GetView<HomeController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: settings.locale.value == 'vi' ? 'Cài đặt' : 'Settings',
             onPressed: () => Get.toNamed(AppRoutes.settings),
           ),
           IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: settings.locale.value == 'vi'
+                ? 'Xóa tất cả'
+                : 'Delete all',
+            onPressed: () => _showDeleteAllDialog(context, settings),
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline),
+            tooltip: settings.locale.value == 'vi' ? 'Thông tin' : 'About',
             onPressed: () => Get.toNamed(AppRoutes.about),
           ),
         ],
@@ -293,5 +302,35 @@ class HomePage extends GetView<HomeController> {
         ],
       );
     });
+  }
+
+  void _showDeleteAllDialog(BuildContext context, SettingsService settings) {
+    final isVi = settings.locale.value == 'vi';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isVi ? 'Xóa tất cả công việc?' : 'Delete all tasks?'),
+        content: Text(
+          isVi
+              ? 'Bạn có chắc muốn xóa tất cả công việc? Hành động này không thể hoàn tác.'
+              : 'Are you sure you want to delete all tasks? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(isVi ? 'Hủy' : 'Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              controller.deleteAllTasks();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(isVi ? 'Xóa tất cả' : 'Delete all'),
+          ),
+        ],
+      ),
+    );
   }
 }
