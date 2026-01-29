@@ -107,8 +107,63 @@ class HomePage extends GetView<HomeController> {
   Widget _buildTabBar(BuildContext context, SettingsService settings) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Obx(
-        () => Row(
+      child: Obx(() {
+        if (controller.isSearching.value) {
+          return Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.grey.shade600),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: controller.searchController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: settings.locale.value == 'vi'
+                                ? 'Tìm kiếm...'
+                                : 'Search...',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          style: const TextStyle(fontSize: 16),
+                          onChanged: controller.onSearchChanged,
+                        ),
+                      ),
+                      if (controller.searchText.isNotEmpty)
+                        GestureDetector(
+                          onTap: controller.clearSearch,
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.grey.shade600,
+                            size: 20,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: controller.toggleSearch,
+                child: Text(settings.locale.value == 'vi' ? 'Hủy' : 'Cancel'),
+              ),
+            ],
+          );
+        }
+
+        return Row(
           children: [
             _buildTabItem(
               context: context,
@@ -124,9 +179,27 @@ class HomePage extends GetView<HomeController> {
               onTap: () => controller.switchTab(TabType.myTasks),
             ),
             const Spacer(),
+            _buildSearchButton(context),
+            const SizedBox(width: 8),
             _buildFilterButton(context, settings),
           ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildSearchButton(BuildContext context) {
+    return InkWell(
+      onTap: controller.toggleSearch,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
         ),
+        child: const Icon(Icons.search, size: 20, color: Colors.grey),
       ),
     );
   }

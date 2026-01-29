@@ -23,6 +23,9 @@ class HomeController extends GetxController {
   final RxBool isLoading = true.obs;
   final Rx<TabType> currentTab = TabType.myTasks.obs;
   final Rx<CalendarFilter> currentFilter = CalendarFilter.all.obs;
+  final RxBool isSearching = false.obs;
+  final RxString searchText = ''.obs;
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void onInit() {
@@ -110,6 +113,27 @@ class HomeController extends GetxController {
     }
   }
 
+  /// Toggles search mode.
+  void toggleSearch() {
+    isSearching.value = !isSearching.value;
+    if (!isSearching.value) {
+      clearSearch();
+    }
+  }
+
+  /// Clears search text.
+  void clearSearch() {
+    searchText.value = '';
+    searchController.clear();
+    update();
+  }
+
+  /// Updates search text.
+  void onSearchChanged(String value) {
+    searchText.value = value;
+    update();
+  }
+
   void _sortTasks() {
     tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
@@ -123,6 +147,14 @@ class HomeController extends GetxController {
         continue;
       if (currentFilter.value == CalendarFilter.lunar && !task.isLunarCalendar)
         continue;
+
+      if (searchText.isNotEmpty) {
+        final query = searchText.value.toLowerCase();
+        final titleMatch = task.title.toLowerCase().contains(query);
+        final descMatch =
+            task.description?.toLowerCase().contains(query) ?? false;
+        if (!titleMatch && !descMatch) continue;
+      }
 
       final dateKey = DateTime(
         task.dueDate.year,
@@ -149,6 +181,14 @@ class HomeController extends GetxController {
         continue;
       if (currentFilter.value == CalendarFilter.lunar && !task.isLunarCalendar)
         continue;
+
+      if (searchText.isNotEmpty) {
+        final query = searchText.value.toLowerCase();
+        final titleMatch = task.title.toLowerCase().contains(query);
+        final descMatch =
+            task.description?.toLowerCase().contains(query) ?? false;
+        if (!titleMatch && !descMatch) continue;
+      }
 
       final dateKey = DateTime(
         task.dueDate.year,
