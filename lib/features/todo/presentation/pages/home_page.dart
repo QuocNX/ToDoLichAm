@@ -6,6 +6,7 @@ import 'package:todo_lich_am/features/todo/presentation/controllers/home_control
 import 'package:todo_lich_am/features/todo/presentation/widgets/task_item_widget.dart';
 import 'package:todo_lich_am/features/todo/presentation/widgets/date_group_header.dart';
 import 'package:todo_lich_am/routes/app_routes.dart';
+import 'package:todo_lich_am/common/widgets/delete_tasks_dialog.dart';
 
 /// Main home page displaying tasks grouped by date.
 class HomePage extends GetView<HomeController> {
@@ -24,22 +25,64 @@ class HomePage extends GetView<HomeController> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: settings.locale.value == 'vi' ? 'Cài đặt' : 'Settings',
-            onPressed: () => Get.toNamed(AppRoutes.settings),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: settings.locale.value == 'vi'
-                ? 'Xóa tất cả'
-                : 'Delete all',
-            onPressed: () => _showDeleteAllDialog(context, settings),
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: settings.locale.value == 'vi' ? 'Thông tin' : 'About',
-            onPressed: () => Get.toNamed(AppRoutes.about),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Tooltip(
+                  message: settings.locale.value == 'vi'
+                      ? 'Cài đặt'
+                      : 'Settings',
+                  child: InkWell(
+                    onTap: () => Get.toNamed(AppRoutes.settings),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.settings,
+                        color: Colors.grey.shade600,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Tooltip(
+                  message: settings.locale.value == 'vi' ? 'Xóa' : 'Delete',
+                  child: InkWell(
+                    onTap: () => _showDeleteAllDialog(context, settings),
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Padding(
+                      padding: EdgeInsets.all(6),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Tooltip(
+                  message: settings.locale.value == 'vi'
+                      ? 'Thông tin'
+                      : 'About',
+                  child: InkWell(
+                    onTap: () => Get.toNamed(AppRoutes.about),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.info_outline,
+                        color: Colors.blue.shade400,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -305,32 +348,14 @@ class HomePage extends GetView<HomeController> {
   }
 
   void _showDeleteAllDialog(BuildContext context, SettingsService settings) {
-    final isVi = settings.locale.value == 'vi';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isVi ? 'Xóa tất cả công việc?' : 'Delete all tasks?'),
-        content: Text(
-          isVi
-              ? 'Bạn có chắc muốn xóa tất cả công việc? Hành động này không thể hoàn tác.'
-              : 'Are you sure you want to delete all tasks? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(isVi ? 'Hủy' : 'Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              controller.deleteAllTasks();
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: Text(isVi ? 'Xóa tất cả' : 'Delete all'),
-          ),
-        ],
-      ),
-    );
+    Get.dialog<Map<String, bool>>(const DeleteTasksDialog()).then((result) {
+      if (result != null) {
+        if (result['deleteAll'] == true) {
+          controller.deleteAllTasks();
+        } else if (result['deleteCompleted'] == true) {
+          controller.deleteCompletedTasks();
+        }
+      }
+    });
   }
 }
