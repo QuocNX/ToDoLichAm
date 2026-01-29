@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:todo_lich_am/core/constants/app_strings.dart';
 import 'package:todo_lich_am/features/todo/data/models/task_model.dart';
@@ -17,7 +18,11 @@ class TaskLocalDataSource {
   /// Gets all tasks from local storage.
   Future<List<TaskModel>> getAllTasks() async {
     final box = await taskBox;
-    return box.values.toList();
+    final allTasks = box.values.toList();
+    debugPrint(
+      'TaskLocalDataSource.getAllTasks: Found ${allTasks.length} tasks in box',
+    );
+    return allTasks;
   }
 
   /// Gets tasks by category.
@@ -46,6 +51,17 @@ class TaskLocalDataSource {
   Future<void> saveTask(TaskModel task) async {
     final box = await taskBox;
     await box.put(task.id, task);
+  }
+
+  /// Saves multiple tasks to local storage.
+  Future<void> saveAllTasks(List<TaskModel> tasks) async {
+    final box = await taskBox;
+    final Map<String, TaskModel> taskMap = {
+      for (var task in tasks) task.id: task,
+    };
+    await box.putAll(taskMap);
+    // Flush to ensure data is persisted before any reads
+    await box.flush();
   }
 
   /// Deletes a task from local storage.

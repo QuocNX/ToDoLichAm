@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_lich_am/core/utils/lunar_calendar_utils.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
@@ -32,9 +33,9 @@ class HomeController extends GetxController {
   }
 
   Future<void> _checkFirstRun() async {
-    // If we're still loading, wait a bit
+    // Wait for initial load to finish
     if (isLoading.value) {
-      await 1.seconds.delay();
+      await 500.milliseconds.delay();
     }
 
     if (tasks.isEmpty) {
@@ -44,9 +45,24 @@ class HomeController extends GetxController {
       );
 
       if (result == true) {
-        // Add a tiny delay to ensure dialog is closed and Hive is ready
-        await Future.delayed(const Duration(milliseconds: 100));
+        debugPrint('HomeController: Dialog returned true, reloading tasks...');
+
+        // Wait for dialog animation to complete and Hive to settle
+        await 500.milliseconds.delay();
+
+        // Force reload tasks directly
         await loadTasks();
+
+        // If still empty, retry once more after a longer delay
+        if (tasks.isEmpty) {
+          debugPrint('HomeController: Tasks still empty, retrying...');
+          await 500.milliseconds.delay();
+          await loadTasks();
+        }
+
+        debugPrint(
+          'HomeController: Final task count after adding holidays: ${tasks.length}',
+        );
       }
     }
   }
@@ -54,15 +70,23 @@ class HomeController extends GetxController {
   /// Loads tasks from repository.
   Future<void> loadTasks() async {
     isLoading.value = true;
+    update();
+
     try {
-      if (currentTab.value == TabType.favorites) {
-        tasks.assignAll(await _repository.getStarredTasks());
-      } else {
-        tasks.assignAll(await _repository.getAllTasks());
-      }
+      final List<TaskEntity> fetchedTasks =
+          (currentTab.value == TabType.favorites)
+          ? await _repository.getStarredTasks()
+          : await _repository.getAllTasks();
+
+      tasks.value = fetchedTasks;
       _sortTasks();
+      debugPrint(
+        'HomeController: Loaded ${tasks.length} tasks on ${currentTab.value}',
+      );
     } finally {
       isLoading.value = false;
+      tasks.refresh();
+      update();
     }
   }
 

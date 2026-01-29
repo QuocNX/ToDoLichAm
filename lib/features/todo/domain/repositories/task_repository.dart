@@ -17,6 +17,9 @@ abstract class TaskRepository {
   /// Adds a new task.
   Future<void> addTask(TaskEntity task);
 
+  /// Adds multiple tasks at once.
+  Future<void> addAllTasks(List<TaskEntity> tasks);
+
   /// Updates an existing task.
   Future<void> updateTask(TaskEntity task);
 

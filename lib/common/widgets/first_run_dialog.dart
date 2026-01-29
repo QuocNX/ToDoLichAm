@@ -261,15 +261,24 @@ class _FirstRunDialogState extends State<FirstRunDialog> {
       final settings = Get.find<SettingsService>();
       final locale = settings.locale.value;
 
+      debugPrint('FirstRunDialog: Starting to add holidays...');
+
       if (_addSolarHolidays) {
         await firstRunService.addSolarHolidays(widget.taskRepository, locale);
+        debugPrint('FirstRunDialog: Solar holidays added');
       }
 
       if (_addLunarHolidays) {
         await firstRunService.addLunarHolidays(widget.taskRepository, locale);
+        debugPrint('FirstRunDialog: Lunar holidays added');
       }
 
       await firstRunService.markFirstRunComplete();
+
+      // Add a longer delay to ensure Hive has finished writing and flushing
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      debugPrint('FirstRunDialog: All holidays saved, closing dialog...');
 
       if (mounted) {
         Get.back(result: true);
