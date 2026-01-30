@@ -155,6 +155,16 @@ class TaskItemWidget extends StatelessWidget {
                                   ? AppColors.textSecondaryDark
                                   : AppColors.textSecondaryLight,
                             ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _getRepeatText(task),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight,
+                              ),
+                            ),
                           ],
                         ],
                       ),
@@ -372,5 +382,43 @@ class TaskItemWidget extends StatelessWidget {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _getRepeatText(TaskEntity task) {
+    if (task.repeatInterval <= 1) {
+      switch (task.repeatType) {
+        case RepeatType.daily:
+          return locale == 'vi' ? 'Hàng ngày' : 'Daily';
+        case RepeatType.weekly:
+          return locale == 'vi' ? 'Hàng tuần' : 'Weekly';
+        case RepeatType.monthly:
+          return locale == 'vi' ? 'Hàng tháng' : 'Monthly';
+        case RepeatType.yearly:
+          return locale == 'vi' ? 'Hàng năm' : 'Yearly';
+        case RepeatType.none:
+          return '';
+      }
+    } else {
+      switch (task.repeatType) {
+        case RepeatType.daily:
+          return locale == 'vi'
+              ? 'Mỗi ${task.repeatInterval} ngày'
+              : 'Every ${task.repeatInterval} days';
+        case RepeatType.weekly:
+          return locale == 'vi'
+              ? 'Mỗi ${task.repeatInterval} tuần'
+              : 'Every ${task.repeatInterval} weeks';
+        case RepeatType.monthly:
+          return locale == 'vi'
+              ? 'Mỗi ${task.repeatInterval} tháng'
+              : 'Every ${task.repeatInterval} months';
+        case RepeatType.yearly:
+          return locale == 'vi'
+              ? 'Mỗi ${task.repeatInterval} năm'
+              : 'Every ${task.repeatInterval} years';
+        case RepeatType.none:
+          return '';
+      }
+    }
   }
 }

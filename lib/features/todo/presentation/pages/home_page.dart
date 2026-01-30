@@ -5,6 +5,7 @@ import 'package:todo_lich_am/features/settings/data/services/settings_service.da
 import 'package:todo_lich_am/features/todo/presentation/controllers/home_controller.dart';
 import 'package:todo_lich_am/features/todo/presentation/widgets/task_item_widget.dart';
 import 'package:todo_lich_am/features/todo/presentation/widgets/date_group_header.dart';
+import 'package:todo_lich_am/features/todo/presentation/widgets/calendar_view_widget.dart';
 import 'package:todo_lich_am/routes/app_routes.dart';
 import 'package:todo_lich_am/common/widgets/delete_tasks_dialog.dart';
 
@@ -89,7 +90,13 @@ class HomePage extends GetView<HomeController> {
       body: Column(
         children: [
           _buildTabBar(context, settings),
-          Expanded(child: _buildTaskList(context, settings)),
+          Expanded(
+            child: Obx(
+              () => controller.currentTab.value == TabType.calendar
+                  ? const CalendarViewWidget()
+                  : _buildTaskList(context, settings),
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -178,10 +185,19 @@ class HomePage extends GetView<HomeController> {
               isSelected: controller.currentTab.value == TabType.myTasks,
               onTap: () => controller.switchTab(TabType.myTasks),
             ),
+            _buildTabItem(
+              context: context,
+              label: settings.locale.value == 'vi' ? 'Lịch' : 'Calendar',
+              icon: Icons.calendar_month,
+              isSelected: controller.currentTab.value == TabType.calendar,
+              onTap: () => controller.switchTab(TabType.calendar),
+            ),
             const Spacer(),
-            _buildSearchButton(context),
-            const SizedBox(width: 8),
-            _buildFilterButton(context, settings),
+            if (controller.currentTab.value != TabType.calendar) ...[
+              _buildSearchButton(context),
+              const SizedBox(width: 8),
+              _buildFilterButton(context, settings),
+            ],
           ],
         );
       }),
@@ -387,134 +403,177 @@ class HomePage extends GetView<HomeController> {
       }
 
       return ListView(
-        padding: const EdgeInsets.only(bottom: 80),
+        padding: const EdgeInsets.only(bottom: 80, top: 16),
         children: [
           if (groupedTasks.isNotEmpty)
-            Theme(
-              data: Theme.of(
-                context,
-              ).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                initiallyExpanded: true,
-                title: Text(
-                  settings.locale.value == 'vi' ? 'Công việc' : 'Tasks',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                children: [
-                  ...groupedTasks.entries.map((entry) {
-                    final date = entry.key;
-                    final dateTasks = entry.value;
+            _buildTaskGroup(
+              context,
+              title: settings.locale.value == 'vi' ? 'Công việc' : 'Tasks',
+              icon: Icons.list_alt,
+              isExpanded: true,
+              children: groupedTasks.entries.map((entry) {
+                final date = entry.key;
+                final dateTasks = entry.value;
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DateGroupHeader(
-                          date: date,
-                          locale: settings.locale.value,
-                          showLunar: settings.showLunar,
-                          showSolar: settings.showSolar,
-                        ),
-                        ...dateTasks.map(
-                          (task) => TaskItemWidget(
-                            task: task,
-                            locale: settings.locale.value,
-                            onToggleComplete: () =>
-                                controller.toggleComplete(task.id),
-                            onToggleStar: () => controller.toggleStar(task.id),
-                            onDelete: () => controller.deleteTask(task.id),
-                            onEdit: () async {
-                              final result = await Get.toNamed(
-                                AppRoutes.editTask,
-                                arguments: task,
-                              );
-                              if (result == true) {
-                                controller.loadTasks();
-                              }
-                            },
-                            onTap: () async {
-                              final result = await Get.toNamed(
-                                AppRoutes.editTask,
-                                arguments: task,
-                              );
-                              if (result == true) {
-                                controller.loadTasks();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ],
-              ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DateGroupHeader(
+                      date: date,
+                      locale: settings.locale.value,
+                      showLunar: settings.showLunar,
+                      showSolar: settings.showSolar,
+                    ),
+                    ...dateTasks.map(
+                      (task) => TaskItemWidget(
+                        task: task,
+                        locale: settings.locale.value,
+                        onToggleComplete: () =>
+                            controller.toggleComplete(task.id),
+                        onToggleStar: () => controller.toggleStar(task.id),
+                        onDelete: () => controller.deleteTask(task.id),
+                        onEdit: () async {
+                          final result = await Get.toNamed(
+                            AppRoutes.editTask,
+                            arguments: task,
+                          );
+                          if (result == true) {
+                            controller.loadTasks();
+                          }
+                        },
+                        onTap: () async {
+                          final result = await Get.toNamed(
+                            AppRoutes.editTask,
+                            arguments: task,
+                          );
+                          if (result == true) {
+                            controller.loadTasks();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           if (groupedCompletedTasks.isNotEmpty)
-            Theme(
-              data: Theme.of(
-                context,
-              ).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                title: Text(
-                  settings.locale.value == 'vi' ? 'Đã hoàn thành' : 'Completed',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                children: [
-                  ...groupedCompletedTasks.entries.map((entry) {
-                    final date = entry.key;
-                    final dateTasks = entry.value;
+            _buildTaskGroup(
+              context,
+              title: settings.locale.value == 'vi'
+                  ? 'Đã hoàn thành'
+                  : 'Completed',
+              icon: Icons.check_circle_outline,
+              isExpanded: false,
+              titleColor: Colors.grey,
+              children: groupedCompletedTasks.entries.map((entry) {
+                final date = entry.key;
+                final dateTasks = entry.value;
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DateGroupHeader(
-                          date: date,
-                          locale: settings.locale.value,
-                          showLunar: settings.showLunar,
-                          showSolar: settings.showSolar,
-                        ),
-                        ...dateTasks.map(
-                          (task) => TaskItemWidget(
-                            task: task,
-                            locale: settings.locale.value,
-                            onToggleComplete: () =>
-                                controller.toggleComplete(task.id),
-                            onToggleStar: () => controller.toggleStar(task.id),
-                            onDelete: () => controller.deleteTask(task.id),
-                            onEdit: () async {
-                              final result = await Get.toNamed(
-                                AppRoutes.editTask,
-                                arguments: task,
-                              );
-                              if (result == true) {
-                                controller.loadTasks();
-                              }
-                            },
-                            onTap: () async {
-                              final result = await Get.toNamed(
-                                AppRoutes.editTask,
-                                arguments: task,
-                              );
-                              if (result == true) {
-                                controller.loadTasks();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ],
-              ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DateGroupHeader(
+                      date: date,
+                      locale: settings.locale.value,
+                      showLunar: settings.showLunar,
+                      showSolar: settings.showSolar,
+                    ),
+                    ...dateTasks.map(
+                      (task) => TaskItemWidget(
+                        task: task,
+                        locale: settings.locale.value,
+                        onToggleComplete: () =>
+                            controller.toggleComplete(task.id),
+                        onToggleStar: () => controller.toggleStar(task.id),
+                        onDelete: () => controller.deleteTask(task.id),
+                        onEdit: () async {
+                          final result = await Get.toNamed(
+                            AppRoutes.editTask,
+                            arguments: task,
+                          );
+                          if (result == true) {
+                            controller.loadTasks();
+                          }
+                        },
+                        onTap: () async {
+                          final result = await Get.toNamed(
+                            AppRoutes.editTask,
+                            arguments: task,
+                          );
+                          if (result == true) {
+                            controller.loadTasks();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
         ],
       );
     });
+  }
+
+  Widget _buildTaskGroup(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+    required bool isExpanded,
+    Color? titleColor,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: isDark ? Colors.white12 : Colors.black.withOpacity(0.05),
+        ),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: isExpanded,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: (titleColor ?? AppColors.primary).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: titleColor ?? AppColors.primary),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color:
+                  titleColor ??
+                  (isDark ? Colors.white : AppColors.textPrimaryLight),
+            ),
+          ),
+          childrenPadding: const EdgeInsets.only(bottom: 16),
+          children: children,
+        ),
+      ),
+    );
   }
 
   void _showDeleteAllDialog(BuildContext context, SettingsService settings) {

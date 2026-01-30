@@ -8,8 +8,11 @@ import 'package:todo_lich_am/features/settings/data/services/first_run_service.d
 import 'package:todo_lich_am/core/services/notification_service.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
 
   // Initialize Hive
   await Hive.initFlutter();

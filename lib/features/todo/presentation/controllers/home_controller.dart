@@ -7,7 +7,7 @@ import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.d
 import 'package:todo_lich_am/common/widgets/first_run_dialog.dart';
 
 /// Tab type for filtering.
-enum TabType { favorites, myTasks }
+enum TabType { favorites, myTasks, calendar }
 
 /// Calendar type for filtering.
 enum CalendarFilter { all, solar, lunar }
@@ -26,6 +26,11 @@ class HomeController extends GetxController {
   final RxBool isSearching = false.obs;
   final RxString searchText = ''.obs;
   final TextEditingController searchController = TextEditingController();
+
+  // Navigation state
+  final RxInt currentNavIndex = 0.obs;
+  final Rx<DateTime> selectedDate = DateTime.now().obs;
+  final Rx<DateTime> focusedDay = DateTime.now().obs;
 
   @override
   void onInit() {
@@ -172,6 +177,22 @@ class HomeController extends GetxController {
     return Map.fromEntries(sortedEntries);
   }
 
+  /// Gets tasks for a specific date (Solar).
+  List<TaskEntity> getTasksForDay(DateTime day) {
+    final dateKey = DateTime(day.year, day.month, day.day);
+    // Combine both active and completed tasks?
+    // Usually calendar shows all.
+    final allTasks = [...tasks];
+    return allTasks.where((task) {
+      final tDate = DateTime(
+        task.dueDate.year,
+        task.dueDate.month,
+        task.dueDate.day,
+      );
+      return tDate.isAtSameMomentAs(dateKey);
+    }).toList();
+  }
+
   /// Groups completed tasks by date for display.
   Map<DateTime, List<TaskEntity>> get groupedCompletedTasks {
     final Map<DateTime, List<TaskEntity>> grouped = {};
@@ -296,6 +317,27 @@ class HomeController extends GetxController {
       Get.snackbar('Lỗi', 'Không thể xóa công việc');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Toggles task completion status.
+  Future<void> toggleTaskComplete(TaskEntity task) async {
+    final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
+    await _updateTask(updatedTask);
+  }
+
+  /// Toggles task starred status.
+  Future<void> toggleTaskStar(TaskEntity task) async {
+    final updatedTask = task.copyWith(isStarred: !task.isStarred);
+    await _updateTask(updatedTask);
+  }
+
+  Future<void> _updateTask(TaskEntity task) async {
+    try {
+      await _repository.updateTask(task);
+      loadTasks();
+    } catch (e) {
+      debugPrint('Error updating task: $e');
     }
   }
 }
