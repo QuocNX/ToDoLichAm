@@ -63,7 +63,11 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Future<void> deleteTask(String id) async {
     await _localDataSource.deleteTask(id);
-    _cancelNotification(id);
+    try {
+      await _cancelNotification(id);
+    } catch (e) {
+      print('Error canceling notification: $e');
+    }
   }
 
   @override
