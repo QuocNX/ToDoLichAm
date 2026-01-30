@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_lich_am/core/constants/app_colors.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
+import 'package:intl/intl.dart';
 
 /// Widget for displaying a single task item with swipe and long press actions.
 class TaskItemWidget extends StatelessWidget {
@@ -390,11 +391,30 @@ class TaskItemWidget extends StatelessWidget {
         case RepeatType.daily:
           return locale == 'vi' ? 'Hàng ngày' : 'Daily';
         case RepeatType.weekly:
-          return locale == 'vi' ? 'Hàng tuần' : 'Weekly';
+          final dayOfWeek = DateFormat('EEEE', locale).format(task.dueDate);
+          return locale == 'vi'
+              ? 'Hàng tuần vào $dayOfWeek'
+              : 'Weekly on $dayOfWeek';
         case RepeatType.monthly:
-          return locale == 'vi' ? 'Hàng tháng' : 'Monthly';
+          if (task.isLunarCalendar) {
+            return locale == 'vi'
+                ? 'Hàng tháng vào ngày ${task.lunarDay} Âm lịch'
+                : 'Monthly on lunar day ${task.lunarDay}';
+          } else {
+            return locale == 'vi'
+                ? 'Hàng tháng vào ngày ${task.dueDate.day}'
+                : 'Monthly on day ${task.dueDate.day}';
+          }
         case RepeatType.yearly:
-          return locale == 'vi' ? 'Hàng năm' : 'Yearly';
+          if (task.isLunarCalendar) {
+            return locale == 'vi'
+                ? 'Hàng năm vào ${task.lunarDay}/${task.lunarMonth} Âm lịch'
+                : 'Yearly on lunar ${task.lunarDay}/${task.lunarMonth}';
+          } else {
+            return locale == 'vi'
+                ? 'Hàng năm vào ${task.dueDate.day}/${task.dueDate.month}'
+                : 'Yearly on ${task.dueDate.day}/${task.dueDate.month}';
+          }
         case RepeatType.none:
           return '';
       }
@@ -405,17 +425,28 @@ class TaskItemWidget extends StatelessWidget {
               ? 'Mỗi ${task.repeatInterval} ngày'
               : 'Every ${task.repeatInterval} days';
         case RepeatType.weekly:
+          final dayOfWeek = DateFormat('EEEE', locale).format(task.dueDate);
           return locale == 'vi'
-              ? 'Mỗi ${task.repeatInterval} tuần'
-              : 'Every ${task.repeatInterval} weeks';
+              ? 'Mỗi ${task.repeatInterval} tuần vào $dayOfWeek'
+              : 'Every ${task.repeatInterval} weeks on $dayOfWeek';
         case RepeatType.monthly:
+          if (task.isLunarCalendar) {
+            return locale == 'vi'
+                ? 'Mỗi ${task.repeatInterval} tháng vào ngày ${task.lunarDay} Âm lịch'
+                : 'Every ${task.repeatInterval} months on lunar day ${task.lunarDay}';
+          }
           return locale == 'vi'
-              ? 'Mỗi ${task.repeatInterval} tháng'
-              : 'Every ${task.repeatInterval} months';
+              ? 'Mỗi ${task.repeatInterval} tháng vào ngày ${task.dueDate.day}'
+              : 'Every ${task.repeatInterval} months on day ${task.dueDate.day}';
         case RepeatType.yearly:
+          if (task.isLunarCalendar) {
+            return locale == 'vi'
+                ? 'Mỗi ${task.repeatInterval} năm vào ${task.lunarDay}/${task.lunarMonth} Âm lịch'
+                : 'Every ${task.repeatInterval} years on lunar ${task.lunarDay}/${task.lunarMonth}';
+          }
           return locale == 'vi'
-              ? 'Mỗi ${task.repeatInterval} năm'
-              : 'Every ${task.repeatInterval} years';
+              ? 'Mỗi ${task.repeatInterval} năm vào ${task.dueDate.day}/${task.dueDate.month}'
+              : 'Every ${task.repeatInterval} years on ${task.dueDate.day}/${task.dueDate.month}';
         case RepeatType.none:
           return '';
       }
