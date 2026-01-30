@@ -158,7 +158,7 @@ class TaskItemWidget extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              _getRepeatText(task),
+                              '${locale == 'vi' ? 'Lặp lại: ' : 'Repeat: '}${_getRepeatText(task)}',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
