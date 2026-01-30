@@ -16,7 +16,7 @@ class App extends StatelessWidget {
 
     return Obx(
       () => GetMaterialApp(
-        title: 'ToDoLichAm',
+        title: 'Nhắc Việc',
         debugShowCheckedModeBanner: false,
 
         // Theme

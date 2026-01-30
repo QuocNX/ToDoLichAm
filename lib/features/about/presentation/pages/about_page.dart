@@ -46,7 +46,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'ToDoLichAm',
+              'Nhắc Việc',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(

@@ -7,7 +7,6 @@ import 'package:todo_lich_am/features/settings/data/services/settings_service.da
 import 'package:todo_lich_am/routes/app_routes.dart';
 import 'package:todo_lich_am/common/widgets/delete_tasks_dialog.dart';
 import 'package:todo_lich_am/features/todo/presentation/controllers/home_controller.dart';
-import 'package:todo_lich_am/core/services/notification_service.dart';
 
 /// Settings page for configuring app preferences.
 class SettingsPage extends StatelessWidget {

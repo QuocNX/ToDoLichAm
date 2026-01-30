@@ -21,7 +21,7 @@ class HomePage extends GetView<HomeController> {
       appBar: AppBar(
         title: Obx(
           () => Text(
-            settings.locale.value == 'vi' ? 'Việc cần làm' : 'To-Do',
+            settings.locale.value == 'vi' ? 'Nhắc Việc' : 'Reminders',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
@@ -397,6 +397,15 @@ class HomePage extends GetView<HomeController> {
       final groupedTasks = controller.groupedTasks;
       final groupedCompletedTasks = controller.groupedCompletedTasks;
 
+      final activeCount = groupedTasks.values.fold(
+        0,
+        (sum, list) => sum + list.length,
+      );
+      final completedCount = groupedCompletedTasks.values.fold(
+        0,
+        (sum, list) => sum + list.length,
+      );
+
       if (controller.tasks.isEmpty) {
         return Center(
           child: Column(
@@ -434,7 +443,9 @@ class HomePage extends GetView<HomeController> {
           if (groupedTasks.isNotEmpty)
             _buildTaskGroup(
               context,
-              title: settings.locale.value == 'vi' ? 'Công việc' : 'Tasks',
+              title: settings.locale.value == 'vi'
+                  ? 'Công việc ($activeCount)'
+                  : 'Tasks ($activeCount)',
               icon: Icons.list_alt,
               isExpanded: true,
               children: groupedTasks.entries.map((entry) {
@@ -486,8 +497,8 @@ class HomePage extends GetView<HomeController> {
             _buildTaskGroup(
               context,
               title: settings.locale.value == 'vi'
-                  ? 'Đã hoàn thành'
-                  : 'Completed',
+                  ? 'Đã hoàn thành ($completedCount)'
+                  : 'Completed ($completedCount)',
               icon: Icons.check_circle_outline,
               isExpanded: false,
               titleColor: Colors.grey,
