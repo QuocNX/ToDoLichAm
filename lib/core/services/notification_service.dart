@@ -122,9 +122,7 @@ class NotificationService extends GetxService {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         notificationId,
         task.title,
-        task.isLunarCalendar
-            ? 'Lịch âm: ${task.lunarDay}/${task.lunarMonth}'
-            : 'Lịch dương: ${triggerDate.day}/${triggerDate.month}',
+        null,
         tz.TZDateTime.from(scheduledDate, tz.local),
         const NotificationDetails(
           android: AndroidNotificationDetails(
