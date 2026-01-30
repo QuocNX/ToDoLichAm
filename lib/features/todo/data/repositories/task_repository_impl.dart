@@ -41,7 +41,7 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<void> addTask(TaskEntity task) async {
     final model = TaskModel.fromEntity(task);
     await _localDataSource.saveTask(model);
-    _scheduleNotification(task);
+    await _scheduleNotification(task);
   }
 
   @override
@@ -49,7 +49,7 @@ class TaskRepositoryImpl implements TaskRepository {
     final models = tasks.map((t) => TaskModel.fromEntity(t)).toList();
     await _localDataSource.saveAllTasks(models);
     for (final task in tasks) {
-      _scheduleNotification(task);
+      await _scheduleNotification(task);
     }
   }
 
@@ -57,7 +57,7 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<void> updateTask(TaskEntity task) async {
     final model = TaskModel.fromEntity(task);
     await _localDataSource.saveTask(model);
-    _scheduleNotification(task);
+    await _scheduleNotification(task);
   }
 
   @override
@@ -182,15 +182,26 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   // Helper methods for accessing NotificationService safely
-  void _scheduleNotification(TaskEntity task) {
+  Future<void> _scheduleNotification(TaskEntity task) async {
+    print('[TaskRepo] _scheduleNotification called for: ${task.title}');
+    print(
+      '[TaskRepo] NotificationService registered: ${Get.isRegistered<NotificationService>()}',
+    );
     if (Get.isRegistered<NotificationService>()) {
-      Get.find<NotificationService>().scheduleTaskNotification(task);
+      try {
+        await Get.find<NotificationService>().scheduleTaskNotification(task);
+        print('[TaskRepo] scheduleTaskNotification completed');
+      } catch (e) {
+        print('[TaskRepo] Error scheduling notification: $e');
+      }
+    } else {
+      print('[TaskRepo] NotificationService NOT registered!');
     }
   }
 
-  void _cancelNotification(String taskId) {
+  Future<void> _cancelNotification(String taskId) async {
     if (Get.isRegistered<NotificationService>()) {
-      Get.find<NotificationService>().cancelTaskNotification(taskId);
+      await Get.find<NotificationService>().cancelTaskNotification(taskId);
     }
   }
 }

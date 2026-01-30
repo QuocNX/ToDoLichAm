@@ -7,6 +7,7 @@ import 'package:todo_lich_am/features/settings/data/services/settings_service.da
 import 'package:todo_lich_am/routes/app_routes.dart';
 import 'package:todo_lich_am/common/widgets/delete_tasks_dialog.dart';
 import 'package:todo_lich_am/features/todo/presentation/controllers/home_controller.dart';
+import 'package:todo_lich_am/core/services/notification_service.dart';
 
 /// Settings page for configuring app preferences.
 class SettingsPage extends StatelessWidget {
@@ -73,6 +74,125 @@ class SettingsPage extends StatelessWidget {
               leading: const Icon(Icons.delete_sweep, color: Colors.red),
               title: Text(isVi ? 'Xóa toàn bộ dữ liệu' : 'Clear all data'),
               onTap: () => _showDeleteDialog(context),
+            ),
+
+            const Divider(),
+
+            // Notification debugging section
+            _buildSectionHeader(
+              context,
+              isVi ? 'Kiểm tra thông báo' : 'Test Notifications',
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.notifications_active,
+                color: Colors.orange,
+              ),
+              title: Text(
+                isVi ? 'Gửi thông báo test' : 'Send test notification',
+              ),
+              subtitle: Text(
+                isVi
+                    ? 'Bấm để kiểm tra thông báo có hoạt động không'
+                    : 'Tap to test if notifications work',
+              ),
+              onTap: () async {
+                final notificationService = Get.find<NotificationService>();
+                await notificationService.showTestNotification();
+                Get.snackbar(
+                  isVi ? 'Đã gửi' : 'Sent',
+                  isVi
+                      ? 'Kiểm tra thanh thông báo của bạn'
+                      : 'Check your notification bar',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.timer, color: Colors.purple),
+              title: Text(isVi ? 'Test hẹn giờ (10s)' : 'Test scheduled (10s)'),
+              subtitle: Text(
+                isVi
+                    ? 'Kiểm tra chức năng hẹn giờ (chờ 10s)'
+                    : 'Test scheduling (wait 10s)',
+              ),
+              onTap: () async {
+                final notificationService = Get.find<NotificationService>();
+                try {
+                  await notificationService.scheduleTestNotification();
+                  Get.snackbar(
+                    isVi ? 'Đã hẹn' : 'Scheduled',
+                    isVi
+                        ? 'Chờ 10s xem có thông báo không'
+                        : 'Wait 10s for notification',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                } catch (e) {
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text('Lỗi / Error'),
+                      content: Text(e.toString()),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.list_alt, color: Colors.blue),
+              title: Text(
+                isVi ? 'Xem thông báo đã hẹn' : 'View pending notifications',
+              ),
+              onTap: () async {
+                final notificationService = Get.find<NotificationService>();
+                final pending = await notificationService
+                    .getPendingNotifications();
+                Get.dialog(
+                  AlertDialog(
+                    title: Text(
+                      isVi
+                          ? 'Thông báo đã hẹn (${pending.length})'
+                          : 'Pending notifications (${pending.length})',
+                    ),
+                    content: SizedBox(
+                      width: double.maxFinite,
+                      height: 300,
+                      child: pending.isEmpty
+                          ? Center(
+                              child: Text(
+                                isVi
+                                    ? 'Không có thông báo nào'
+                                    : 'No pending notifications',
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: pending.length,
+                              itemBuilder: (context, index) {
+                                final n = pending[index];
+                                return ListTile(
+                                  title: Text(n.title ?? 'No title'),
+                                  subtitle: Text(
+                                    'ID: ${n.id}\n${n.body ?? ''}',
+                                  ),
+                                  isThreeLine: true,
+                                );
+                              },
+                            ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: Text(isVi ? 'Đóng' : 'Close'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         );

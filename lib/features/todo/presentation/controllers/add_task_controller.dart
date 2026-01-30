@@ -7,6 +7,7 @@ import 'package:todo_lich_am/core/utils/lunar_calendar_utils.dart';
 import 'package:todo_lich_am/features/settings/data/services/settings_service.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
+import 'package:todo_lich_am/core/services/notification_service.dart';
 
 /// Controller for add/edit task page.
 class AddTaskController extends GetxController {
@@ -187,6 +188,17 @@ class AddTaskController extends GetxController {
         await _repository.updateTask(task);
       } else {
         await _repository.addTask(task);
+      }
+
+      // Explicitly schedule notification from controller as backup
+      // Wrapped in try-catch so it doesn't break task saving
+      try {
+        if (Get.isRegistered<NotificationService>()) {
+          await Get.find<NotificationService>().scheduleTaskNotification(task);
+        }
+      } catch (e) {
+        // Notification scheduling failed but task was saved successfully
+        // Don't show error to user for this
       }
 
       Get.back(result: true);
