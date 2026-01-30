@@ -3,7 +3,7 @@ class AppStrings {
   AppStrings._();
 
   // App info
-  static const String appName = 'ToDoLichAm';
+  static const String appName = 'Nhắc Việc - Ngày Lễ - Ngày Giỗ';
   static const String appVersion = '1.0.0';
 
   // Database

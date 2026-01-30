@@ -11,10 +11,11 @@ class AboutPage extends StatelessWidget {
 
   // TODO: Replace with actual author info
   static const String authorName = 'Nguyễn Xuân Quốc';
-  static const String bankName = 'Vietcombank';
-  static const String accountNumber = '1234567890';
+  static const String bankName =
+      'Ngân hàng VPBank – Ngân hàng TMCP Việt Nam Thịnh Vượng';
+  static const String accountNumber = '989 6688 7799';
   static const String accountHolder = 'NGUYEN XUAN QUOC';
-  static const String email = 'quocnx@example.com';
+  static const String email = 'quocnx9@gmail.com';
   static const String facebook = 'facebook.com/quocnx';
 
   @override
@@ -99,8 +100,8 @@ class AboutPage extends StatelessWidget {
                     children: [
                       Text(
                         isVi
-                            ? 'Nếu bạn thấy ứng dụng hữu ích, hãy ủng hộ tác giả nhé!'
-                            : 'If you find this app useful, please support the author!',
+                            ? '❤️ Nếu bạn thấy ứng dụng hữu ích, hãy ủng hộ tác giả nhé!'
+                            : '❤️ If you find this app useful, please support the author!',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isDark
@@ -109,21 +110,14 @@ class AboutPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // QR placeholder
-                      Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.lightDivider),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.qr_code,
-                            size: 100,
-                            color: Colors.black54,
-                          ),
+                      // Bank QR Image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/bank.jpg',
+                          width: 300,
+                          height: 400,
+                          fit: BoxFit.cover,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -132,22 +126,46 @@ class AboutPage extends StatelessWidget {
                 ),
                 _buildBankInfoRow(
                   context,
-                  isVi ? 'Ngân hàng' : 'Bank',
+                  isVi ? '🏦 Ngân hàng' : '🏦 Bank',
                   bankName,
                   copyable: false,
                 ),
                 _buildBankInfoRow(
                   context,
-                  isVi ? 'Số tài khoản' : 'Account',
+                  isVi ? '💳 Số tài khoản' : '💳 Account',
                   accountNumber,
                   copyable: true,
                   isVi: isVi,
                 ),
                 _buildBankInfoRow(
                   context,
-                  isVi ? 'Chủ tài khoản' : 'Holder',
+                  isVi ? '👤 Chủ tài khoản' : '👤 Holder',
                   accountHolder,
                   copyable: false,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Services section
+            _buildSection(
+              context: context,
+              title: isVi ? 'Dịch vụ' : 'Services',
+              icon: Icons.work,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    isVi
+                        ? '🔧 Nhận tùy chỉnh app này riêng theo nhu cầu cá nhân của bạn.\n\n💡 Hoặc bạn có ý tưởng độc đáo?\n📱 Chúng tôi nhận thiết kế và phát triển ứng dụng di động theo yêu cầu cho cá nhân và doanh nghiệp.\n📞 Hãy liên hệ để biến ý tưởng thành hiện thực!'
+                        : '🔧 Customize this app for your personal needs.\n\n💡 Have a unique idea?\n📱 We offer custom mobile app design and development for individuals and businesses.\n📞 Contact us to bring your vision to life!',
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
+                    ),
+                    textAlign: TextAlign.justify,
+                  ),
                 ),
               ],
             ),
@@ -181,7 +199,7 @@ class AboutPage extends StatelessWidget {
 
             // Made with love
             Text(
-              isVi ? 'Được tạo với ❤️ tại Việt Nam' : 'Made with ❤️ in Vietnam',
+              isVi ? 'Cảm ơn bạn!' : 'Thank you!',
               style: TextStyle(
                 color: isDark
                     ? AppColors.textSecondaryDark
