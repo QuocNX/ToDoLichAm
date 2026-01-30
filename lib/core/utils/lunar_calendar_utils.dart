@@ -41,7 +41,7 @@ class LunarCalendarUtils {
     bool showSolar = true,
   }) {
     final lunar = solarToLunar(solarDate);
-    final dayOfWeek = _getDayOfWeekVietnamese(solarDate.weekday, locale);
+    final dayOfWeek = getDayOfWeekVietnamese(solarDate.weekday, locale);
     final solarStr = '$dayOfWeek, ${solarDate.day} thg ${solarDate.month}';
     final lunarStr = '${lunar.getDay()}/${lunar.getMonth()}';
 
@@ -55,7 +55,7 @@ class LunarCalendarUtils {
   }
 
   /// Gets Vietnamese day of week abbreviation.
-  static String _getDayOfWeekVietnamese(int weekday, String locale) {
+  static String getDayOfWeekVietnamese(int weekday, String locale) {
     if (locale == 'vi') {
       const days = ['', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
       return days[weekday];

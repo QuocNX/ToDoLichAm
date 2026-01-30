@@ -5,6 +5,7 @@ import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:todo_lich_am/features/todo/domain/repositories/task_repository.dart';
 
 import 'package:todo_lich_am/common/widgets/first_run_dialog.dart';
+import 'package:todo_lich_am/features/settings/data/services/settings_service.dart';
 
 /// Tab type for filtering.
 enum TabType { favorites, myTasks, calendar }
@@ -230,13 +231,101 @@ class HomeController extends GetxController {
   /// Toggles task completion.
   Future<void> toggleComplete(String taskId) async {
     try {
-      await _repository.toggleComplete(taskId);
-      // Reload tasks to reflect potential new history items (for recurring tasks)
-      // or rescheduled tasks
+      final updatedTask = await _repository.toggleComplete(taskId);
+      _showCompletionSnackbar(updatedTask);
       loadTasks();
     } catch (e) {
       Get.snackbar('Lỗi', 'Không thể cập nhật công việc');
     }
+  }
+
+  void _showCompletionSnackbar(TaskEntity task) {
+    if (!task.isCompleted && task.repeatType == RepeatType.none) {
+      // This was an uncheck (marking as incomplete), don't show "Completed" snackbar
+      return;
+    }
+
+    final settings = Get.find<SettingsService>();
+    final locale = settings.locale.value;
+    final isVi = locale == 'vi';
+
+    final titleText = isVi ? 'Thông báo' : 'Notification';
+    final completedText = isVi
+        ? 'Đã hoàn thành: ${task.title}'
+        : 'Completed: ${task.title}';
+
+    Widget messageWidget;
+
+    if (!task.isCompleted) {
+      // It was a recurring task, and this is the next occurrence
+      final isLunar = task.isLunarCalendar;
+      String nextDateStr;
+
+      final dayOfWeek = LunarCalendarUtils.getDayOfWeekVietnamese(
+        task.dueDate.weekday,
+        locale,
+      );
+
+      if (isLunar) {
+        final lunar = LunarCalendarUtils.solarToLunar(task.dueDate);
+        final canChi = LunarCalendarUtils.getVietnameseGanZhiYear(
+          lunar.getYear(),
+        );
+        nextDateStr =
+            '$dayOfWeek, ${lunar.getDay()}/${lunar.getMonth()}/${lunar.getYear()} - $canChi';
+      } else {
+        nextDateStr =
+            '$dayOfWeek, ${task.dueDate.day}/${task.dueDate.month}/${task.dueDate.year}';
+      }
+
+      messageWidget = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(completedText, style: const TextStyle(color: Colors.white)),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Text(
+                isVi ? 'Lịch kế tiếp: ' : 'Next occurrence: ',
+                style: const TextStyle(color: Colors.white),
+              ),
+              Icon(
+                isLunar ? Icons.nights_stay_outlined : Icons.wb_sunny_outlined,
+                size: 16,
+                color: Colors.white, // Keep white for contrast on green bg
+              ),
+              const SizedBox(width: 4),
+              Text(
+                nextDateStr,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      // Non-recurring task
+      messageWidget = Text(
+        completedText,
+        style: const TextStyle(color: Colors.white),
+      );
+    }
+
+    Get.snackbar(
+      titleText,
+      '', // Message is replaced by messageText
+      messageText: messageWidget,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green.withOpacity(0.9),
+      colorText: Colors.white,
+      duration: const Duration(seconds: 4),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+      icon: const Icon(Icons.check_circle, color: Colors.white),
+    );
   }
 
   /// Toggles task starred status.
@@ -322,8 +411,20 @@ class HomeController extends GetxController {
 
   /// Toggles task completion status.
   Future<void> toggleTaskComplete(TaskEntity task) async {
-    final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
-    await _updateTask(updatedTask);
+    try {
+      if (!task.isCompleted) {
+        // Toggle from incomplete to complete
+        final updatedTask = await _repository.toggleComplete(task.id);
+        _showCompletionSnackbar(updatedTask);
+      } else {
+        // Toggle from complete to incomplete
+        await _repository.toggleComplete(task.id);
+      }
+      loadTasks();
+    } catch (e) {
+      debugPrint('Error updating task: $e');
+      Get.snackbar('Lỗi', 'Không thể cập nhật công việc');
+    }
   }
 
   /// Toggles task starred status.

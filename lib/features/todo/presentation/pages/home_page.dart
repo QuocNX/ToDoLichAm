@@ -170,35 +170,58 @@ class HomePage extends GetView<HomeController> {
           );
         }
 
-        return Row(
-          children: [
-            _buildTabItem(
-              context: context,
-              icon: Icons.star,
-              label: settings.locale.value == 'vi' ? 'Yêu thích' : 'Favorites',
-              isSelected: controller.currentTab.value == TabType.favorites,
-              onTap: () => controller.switchTab(TabType.favorites),
-            ),
-            _buildTabItem(
-              context: context,
-              label: settings.locale.value == 'vi' ? 'Công việc' : 'My Tasks',
-              isSelected: controller.currentTab.value == TabType.myTasks,
-              onTap: () => controller.switchTab(TabType.myTasks),
-            ),
-            _buildTabItem(
-              context: context,
-              label: settings.locale.value == 'vi' ? 'Lịch' : 'Calendar',
-              icon: Icons.calendar_month,
-              isSelected: controller.currentTab.value == TabType.calendar,
-              onTap: () => controller.switchTab(TabType.calendar),
-            ),
-            const Spacer(),
-            if (controller.currentTab.value != TabType.calendar) ...[
-              _buildSearchButton(context),
-              const SizedBox(width: 8),
-              _buildFilterButton(context, settings),
+        return SizedBox(
+          height: 48,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _buildTabItem(
+                        context: context,
+                        icon: Icons.star,
+                        label: settings.locale.value == 'vi'
+                            ? 'Yêu thích'
+                            : 'Favorites',
+                        isSelected:
+                            controller.currentTab.value == TabType.favorites,
+                        onTap: () => controller.switchTab(TabType.favorites),
+                      ),
+                      _buildTabItem(
+                        context: context,
+                        label: settings.locale.value == 'vi'
+                            ? 'Công việc'
+                            : 'Tasks',
+                        isSelected:
+                            controller.currentTab.value == TabType.myTasks,
+                        onTap: () => controller.switchTab(TabType.myTasks),
+                      ),
+                      _buildTabItem(
+                        context: context,
+                        label: settings.locale.value == 'vi'
+                            ? 'Lịch'
+                            : 'Calendar',
+                        icon: Icons.calendar_month,
+                        isSelected:
+                            controller.currentTab.value == TabType.calendar,
+                        onTap: () => controller.switchTab(TabType.calendar),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (controller.currentTab.value != TabType.calendar) ...[
+                const SizedBox(width: 12),
+                _buildSearchButton(context),
+                const SizedBox(width: 8),
+                _buildFilterButton(context, settings),
+              ],
             ],
-          ],
+          ),
         );
       }),
     );
@@ -325,17 +348,20 @@ class HomePage extends GetView<HomeController> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        height: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
               color: isSelected ? AppColors.primary : Colors.transparent,
-              width: 2,
+              width: 3,
             ),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (icon != null) ...[
               Icon(
