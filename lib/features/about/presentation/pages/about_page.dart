@@ -11,8 +11,7 @@ class AboutPage extends StatelessWidget {
 
   // TODO: Replace with actual author info
   static const String authorName = 'Nguyễn Xuân Quốc';
-  static const String bankName =
-      'Ngân hàng VPBank – Ngân hàng TMCP Việt Nam Thịnh Vượng';
+  static const String bankName = 'VPBank';
   static const String accountNumber = '989 6688 7799';
   static const String accountHolder = 'NGUYEN XUAN QUOC';
   static const String email = 'quocnx9@gmail.com';
@@ -111,16 +110,16 @@ class AboutPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       // Bank QR Image
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          'assets/bank.jpg',
-                          width: 300,
-                          height: 400,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      // ClipRRect(
+                      //   borderRadius: BorderRadius.circular(12),
+                      //   child: Image.asset(
+                      //     'assets/bank.jpg',
+                      //     width: 300,
+                      //     height: 400,
+                      //     fit: BoxFit.cover,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 16),
                     ],
                   ),
                 ),
