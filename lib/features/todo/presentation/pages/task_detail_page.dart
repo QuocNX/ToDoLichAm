@@ -14,7 +14,9 @@ class TaskDetailPage extends StatelessWidget {
     final task = Get.arguments as TaskEntity;
     final settings = Get.find<SettingsService>();
     final isVi = settings.locale.value == 'vi';
-    final lunar = LunarCalendarUtils.solarToLunar(task.dueDate);
+    final lunar = task.dueDate != null
+        ? LunarCalendarUtils.solarToLunar(task.dueDate!)
+        : null;
 
     return Scaffold(
       appBar: AppBar(title: Text(isVi ? 'Chi tiết' : 'Details')),
@@ -56,27 +58,29 @@ class TaskDetailPage extends StatelessWidget {
             ],
 
             // Date info card
-            _buildInfoCard(
-              context: context,
-              icon: Icons.calendar_today,
-              title: isVi ? 'Ngày' : 'Date',
-              children: [
-                _buildInfoRow(
-                  isVi ? 'Dương lịch' : 'Solar',
-                  '${task.dueDate.day}/${task.dueDate.month}/${task.dueDate.year}',
-                ),
-                _buildInfoRow(
-                  isVi ? 'Âm lịch' : 'Lunar',
-                  '${lunar.getDay()}/${lunar.getMonth()}/${lunar.getYear()}',
-                ),
-                if (task.time != null)
+            if (task.dueDate != null && lunar != null) ...[
+              _buildInfoCard(
+                context: context,
+                icon: Icons.calendar_today,
+                title: isVi ? 'Ngày' : 'Date',
+                children: [
                   _buildInfoRow(
-                    isVi ? 'Giờ' : 'Time',
-                    '${task.time!.hour.toString().padLeft(2, '0')}:${task.time!.minute.toString().padLeft(2, '0')}',
+                    isVi ? 'Dương lịch' : 'Solar',
+                    '${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}',
                   ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                  _buildInfoRow(
+                    isVi ? 'Âm lịch' : 'Lunar',
+                    '${lunar.getDay()}/${lunar.getMonth()}/${lunar.getYear()}',
+                  ),
+                  if (task.time != null)
+                    _buildInfoRow(
+                      isVi ? 'Giờ' : 'Time',
+                      '${task.time!.hour.toString().padLeft(2, '0')}:${task.time!.minute.toString().padLeft(2, '0')}',
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Repeat info
             if (task.repeatType != RepeatType.none)

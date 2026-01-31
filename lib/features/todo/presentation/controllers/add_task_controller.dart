@@ -21,7 +21,7 @@ class AddTaskController extends GetxController {
   final repeatIntervalController = TextEditingController(text: '1');
 
   // Observable state
-  final Rx<DateTime> selectedDate = DateTime.now().obs;
+  final Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
   final Rx<TimeOfDay?> selectedTime = Rx<TimeOfDay?>(null);
   final RxBool isLunarCalendar = false.obs;
   final Rx<RepeatType> repeatType = RepeatType.none.obs;
@@ -29,6 +29,10 @@ class AddTaskController extends GetxController {
   final RxList<int> selectedWeekDays = <int>[].obs;
   final RxBool isStarred = false.obs;
   final RxBool isLoading = false.obs;
+
+  // Visibility state
+  final RxBool isDescriptionVisible = false.obs;
+  final RxBool isScheduleVisible = false.obs;
 
   // For editing an existing task
   TaskEntity? editingTask;
@@ -46,6 +50,11 @@ class AddTaskController extends GetxController {
     if (Get.arguments is TaskEntity) {
       editingTask = Get.arguments as TaskEntity;
       _loadTaskData(editingTask!);
+    } else {
+      // New task: focus title handled in UI, hidden sections by default
+      // Date defaults to today if user enables schedule? Or null?
+      // User: "Click schedule button -> show date time".
+      // Let's set default date when toggling.
     }
 
     _updateDateDisplays();
@@ -54,8 +63,10 @@ class AddTaskController extends GetxController {
     ever(selectedDate, (_) => _updateDateDisplays());
     ever(isLunarCalendar, (_) => _updateDateDisplays());
     ever(repeatType, (type) {
-      if (type == RepeatType.weekly && selectedWeekDays.isEmpty) {
-        selectedWeekDays.add(selectedDate.value.weekday);
+      if (type == RepeatType.weekly &&
+          selectedWeekDays.isEmpty &&
+          selectedDate.value != null) {
+        selectedWeekDays.add(selectedDate.value!.weekday);
       }
     });
 
@@ -70,7 +81,22 @@ class AddTaskController extends GetxController {
   void _loadTaskData(TaskEntity task) {
     titleController.text = task.title;
     descriptionController.text = task.description ?? '';
+    if (task.description != null && task.description!.isNotEmpty) {
+      isDescriptionVisible.value = true;
+    }
+
+    // Assuming we might change TaskEntity to allow nullable dueDate later?
+    // Or if currently it is required, we use it.
+    // CAUTION: If TaskEntity requires dueDate, we must provide one.
+    // Current code: `selectedDate.value = task.dueDate;`
+    // If we want "no date", we need to support it in Entity.
+    // For now, let's assume we maintain existing behavior but use flag for visibility?
+    // User request: "If don't pick day, task has no date".
+    // This strongly suggests nullable dueDate.
+
     selectedDate.value = task.dueDate;
+    isScheduleVisible.value = true; // Existing tasks have date
+
     if (task.time != null) {
       selectedTime.value = TimeOfDay(
         hour: task.time!.hour,
@@ -87,6 +113,29 @@ class AddTaskController extends GetxController {
     isStarred.value = task.isStarred;
   }
 
+  void toggleDescription() {
+    isDescriptionVisible.toggle();
+    if (!isDescriptionVisible.value) {
+      descriptionController.clear();
+    }
+  }
+
+  void toggleSchedule() {
+    isScheduleVisible.toggle();
+    if (isScheduleVisible.value) {
+      // If turning ON and no date selected, default to Today
+      if (selectedDate.value == null) {
+        selectedDate.value = DateTime.now();
+      }
+    } else {
+      // If turning OFF, clear date/time/repeat?
+      // User said "if not choose date, task has no date".
+      selectedDate.value = null;
+      selectedTime.value = null;
+      repeatType.value = RepeatType.none;
+    }
+  }
+
   void toggleWeekDay(int day) {
     if (selectedWeekDays.contains(day)) {
       if (selectedWeekDays.length > 1) {
@@ -98,23 +147,30 @@ class AddTaskController extends GetxController {
   }
 
   void _updateDateDisplays() {
-    final lunar = LunarCalendarUtils.solarToLunar(selectedDate.value);
+    if (selectedDate.value == null) {
+      lunarDateDisplay.value = '';
+      solarDateDisplay.value = '';
+      return;
+    }
+
+    final date = selectedDate.value!;
+    final lunar = LunarCalendarUtils.solarToLunar(date);
 
     lunarDateDisplay.value =
         '${lunar.getDay()}/${lunar.getMonth()}/${lunar.getYear()}';
-    solarDateDisplay.value =
-        '${selectedDate.value.day}/${selectedDate.value.month}/${selectedDate.value.year}';
+    solarDateDisplay.value = '${date.day}/${date.month}/${date.year}';
   }
 
   /// Selects a date using the appropriate picker.
   Future<void> selectDate(BuildContext context) async {
     final settings = Get.find<SettingsService>();
+    final initial = selectedDate.value ?? DateTime.now();
 
     if (isLunarCalendar.value) {
       await showModalBottomSheet(
         context: context,
         builder: (context) => LunarDatePicker(
-          initialDate: selectedDate.value,
+          initialDate: initial,
           locale: settings.locale.value,
           onDateChanged: (date) {
             selectedDate.value = date;
@@ -124,7 +180,7 @@ class AddTaskController extends GetxController {
     } else {
       final picked = await showDatePicker(
         context: context,
-        initialDate: selectedDate.value,
+        initialDate: initial,
         firstDate: DateTime.now().subtract(const Duration(days: 365)),
         lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
         locale: Locale(settings.locale.value),
@@ -137,6 +193,8 @@ class AddTaskController extends GetxController {
 
   /// Selects time.
   Future<void> selectTime(BuildContext context) async {
+    if (selectedDate.value == null) return; // Cannot select time without date
+
     final picked = await showTimePicker(
       context: context,
       initialTime: selectedTime.value ?? TimeOfDay.now(),
@@ -164,11 +222,11 @@ class AddTaskController extends GetxController {
     try {
       // Convert time to DateTime if selected
       DateTime? taskTime;
-      if (selectedTime.value != null) {
+      if (selectedTime.value != null && selectedDate.value != null) {
         taskTime = DateTime(
-          selectedDate.value.year,
-          selectedDate.value.month,
-          selectedDate.value.day,
+          selectedDate.value!.year,
+          selectedDate.value!.month,
+          selectedDate.value!.day,
           selectedTime.value!.hour,
           selectedTime.value!.minute,
         );
@@ -176,8 +234,8 @@ class AddTaskController extends GetxController {
 
       // Get lunar date info if using lunar calendar
       int? lunarDay, lunarMonth, lunarYear;
-      if (isLunarCalendar.value) {
-        final lunar = LunarCalendarUtils.solarToLunar(selectedDate.value);
+      if (isLunarCalendar.value && selectedDate.value != null) {
+        final lunar = LunarCalendarUtils.solarToLunar(selectedDate.value!);
         lunarDay = lunar.getDay();
         lunarMonth = lunar.getMonth();
         lunarYear = lunar.getYear();

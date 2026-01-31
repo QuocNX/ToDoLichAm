@@ -29,7 +29,7 @@ class BackupService extends GetxService {
           'id': task.id,
           'title': task.title,
           'description': task.description,
-          'dueDate': task.dueDate.toIso8601String(),
+          'dueDate': task.dueDate?.toIso8601String(),
           'time': task.time?.toIso8601String(),
           'isLunarCalendar': task.isLunarCalendar,
           'repeatType': task.repeatType,
@@ -92,7 +92,9 @@ class BackupService extends GetxService {
               id: item['id'] ?? '',
               title: item['title'] ?? '',
               description: item['description'],
-              dueDate: DateTime.parse(item['dueDate']),
+              dueDate: item['dueDate'] != null
+                  ? DateTime.parse(item['dueDate'])
+                  : null,
               time: item['time'] != null ? DateTime.parse(item['time']) : null,
               isLunarCalendar: item['isLunarCalendar'] ?? false,
               repeatType: item['repeatType'] ?? 'none',

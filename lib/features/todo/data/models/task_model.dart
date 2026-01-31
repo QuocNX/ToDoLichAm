@@ -13,7 +13,7 @@ class TaskModel extends HiveObject {
   final String? description;
 
   @HiveField(3)
-  final DateTime dueDate;
+  final DateTime? dueDate;
 
   @HiveField(4)
   final DateTime? time;
@@ -58,7 +58,7 @@ class TaskModel extends HiveObject {
     required this.id,
     required this.title,
     this.description,
-    required this.dueDate,
+    this.dueDate,
     this.time,
     this.isLunarCalendar = false,
     this.repeatType = 'none',
@@ -136,7 +136,7 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       id: fields[0] as String,
       title: fields[1] as String,
       description: fields[2] as String?,
-      dueDate: fields[3] as DateTime,
+      dueDate: fields[3] as DateTime?,
       time: fields[4] as DateTime?,
       isLunarCalendar: fields[5] as bool? ?? false,
       repeatType: fields[6] as String? ?? 'none',

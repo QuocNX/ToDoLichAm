@@ -94,11 +94,14 @@ class NotificationService extends GetxService {
         print('[NotificationService] Error converting lunar date: $e');
         return;
       }
-    } else {
-      triggerDate = task.dueDate;
+    } else if (task.dueDate != null) {
+      triggerDate = task.dueDate!;
       print(
         '[NotificationService] Using solar calendar: triggerDate=$triggerDate',
       );
+    } else {
+      print('[NotificationService] No due date, skipping notification');
+      return;
     }
 
     DateTime scheduledDate = _combineDateAndTime(triggerDate, task.time);

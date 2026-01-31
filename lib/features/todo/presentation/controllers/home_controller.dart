@@ -141,7 +141,12 @@ class HomeController extends GetxController {
   }
 
   void _sortTasks() {
-    tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    tasks.sort((a, b) {
+      if (a.dueDate == null && b.dueDate == null) return 0;
+      if (a.dueDate == null) return 1;
+      if (b.dueDate == null) return -1;
+      return a.dueDate!.compareTo(b.dueDate!);
+    });
   }
 
   /// Groups uncompleted tasks by date for display.
@@ -162,33 +167,43 @@ class HomeController extends GetxController {
         if (!titleMatch && !descMatch) continue;
       }
 
-      final dateKey = DateTime(
-        task.dueDate.year,
-        task.dueDate.month,
-        task.dueDate.day,
-      );
+      DateTime dateKey;
+      if (task.dueDate != null) {
+        dateKey = DateTime(
+          task.dueDate!.year,
+          task.dueDate!.month,
+          task.dueDate!.day,
+        );
+      } else {
+        // Use a special date for "No Date" tasks
+        dateKey = DateTime(0);
+      }
 
       grouped.putIfAbsent(dateKey, () => []).add(task);
     }
 
     // Sort the map by date
     final sortedEntries = grouped.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
+      ..sort((a, b) {
+        if (a.key.year == 0) return 1; // No Date at bottom
+        if (b.key.year == 0) return -1;
+        return a.key.compareTo(b.key);
+      });
 
     return Map.fromEntries(sortedEntries);
   }
 
   /// Gets tasks for a specific date (Solar).
   List<TaskEntity> getTasksForDay(DateTime day) {
+    // Calendar only shows tasks with dates
     final dateKey = DateTime(day.year, day.month, day.day);
-    // Combine both active and completed tasks?
-    // Usually calendar shows all.
     final allTasks = [...tasks];
     return allTasks.where((task) {
+      if (task.dueDate == null) return false;
       final tDate = DateTime(
-        task.dueDate.year,
-        task.dueDate.month,
-        task.dueDate.day,
+        task.dueDate!.year,
+        task.dueDate!.month,
+        task.dueDate!.day,
       );
       return tDate.isAtSameMomentAs(dateKey);
     }).toList();
@@ -212,18 +227,27 @@ class HomeController extends GetxController {
         if (!titleMatch && !descMatch) continue;
       }
 
-      final dateKey = DateTime(
-        task.dueDate.year,
-        task.dueDate.month,
-        task.dueDate.day,
-      );
+      DateTime dateKey;
+      if (task.dueDate != null) {
+        dateKey = DateTime(
+          task.dueDate!.year,
+          task.dueDate!.month,
+          task.dueDate!.day,
+        );
+      } else {
+        dateKey = DateTime(0);
+      }
 
       grouped.putIfAbsent(dateKey, () => []).add(task);
     }
 
     // Sort the map by date
     final sortedEntries = grouped.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
+      ..sort((a, b) {
+        if (a.key.year == 0) return 1;
+        if (b.key.year == 0) return -1;
+        return a.key.compareTo(b.key);
+      });
 
     return Map.fromEntries(sortedEntries);
   }
@@ -241,7 +265,6 @@ class HomeController extends GetxController {
 
   void _showCompletionSnackbar(TaskEntity task) {
     if (!task.isCompleted && task.repeatType == RepeatType.none) {
-      // This was an uncheck (marking as incomplete), don't show "Completed" snackbar
       return;
     }
 
@@ -256,18 +279,18 @@ class HomeController extends GetxController {
 
     Widget messageWidget;
 
-    if (!task.isCompleted) {
+    if (!task.isCompleted && task.dueDate != null) {
       // It was a recurring task, and this is the next occurrence
       final isLunar = task.isLunarCalendar;
       String nextDateStr;
 
       final dayOfWeek = LunarCalendarUtils.getDayOfWeekVietnamese(
-        task.dueDate.weekday,
+        task.dueDate!.weekday,
         locale,
       );
 
       if (isLunar) {
-        final lunar = LunarCalendarUtils.solarToLunar(task.dueDate);
+        final lunar = LunarCalendarUtils.solarToLunar(task.dueDate!);
         final canChi = LunarCalendarUtils.getVietnameseGanZhiYear(
           lunar.getYear(),
         );
@@ -275,7 +298,7 @@ class HomeController extends GetxController {
             '$dayOfWeek, ${lunar.getDay()}/${lunar.getMonth()}/${lunar.getYear()} - $canChi';
       } else {
         nextDateStr =
-            '$dayOfWeek, ${task.dueDate.day}/${task.dueDate.month}/${task.dueDate.year}';
+            '$dayOfWeek, ${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}';
       }
 
       messageWidget = Column(
@@ -292,7 +315,7 @@ class HomeController extends GetxController {
               Icon(
                 isLunar ? Icons.nights_stay_outlined : Icons.wb_sunny_outlined,
                 size: 16,
-                color: Colors.white, // Keep white for contrast on green bg
+                color: Colors.white,
               ),
               const SizedBox(width: 4),
               Text(
@@ -307,7 +330,7 @@ class HomeController extends GetxController {
         ],
       );
     } else {
-      // Non-recurring task
+      // Non-recurring task or no date
       messageWidget = Text(
         completedText,
         style: const TextStyle(color: Colors.white),

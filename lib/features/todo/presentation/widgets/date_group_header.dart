@@ -19,6 +19,32 @@ class DateGroupHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (date.year == 0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_outlined,
+              size: 16,
+              color: Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              locale == 'vi' ? 'Không có ngày' : 'No Date',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final isToday = LunarCalendarUtils.isToday(date);
     final daysRemaining = LunarCalendarUtils.daysRemaining(date);
 

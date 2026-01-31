@@ -42,7 +42,7 @@ class TaskEntity {
   final String id;
   final String title;
   final String? description;
-  final DateTime dueDate;
+  final DateTime? dueDate;
   final DateTime? time;
   final bool isLunarCalendar;
   final RepeatType repeatType;
@@ -61,7 +61,7 @@ class TaskEntity {
     required this.id,
     required this.title,
     this.description,
-    required this.dueDate,
+    this.dueDate,
     this.time,
     this.isLunarCalendar = false,
     this.repeatType = RepeatType.none,

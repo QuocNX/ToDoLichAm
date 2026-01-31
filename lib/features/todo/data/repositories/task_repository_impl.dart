@@ -79,7 +79,7 @@ class TaskRepositoryImpl implements TaskRepository {
 
     if (!task.isCompleted) {
       // Marking as complete
-      if (task.repeatType != RepeatType.none) {
+      if (task.repeatType != RepeatType.none && task.dueDate != null) {
         // For recurring tasks:
         // 1. Create a completed copy for history (current date)
         final completedTask = TaskEntity(
@@ -94,8 +94,7 @@ class TaskRepositoryImpl implements TaskRepository {
           isCompleted: true, // Mark as completed
           isStarred: task.isStarred,
           category: task.category,
-          createdAt: task
-              .createdAt, // Keep original creation time? Or now? Usually original.
+          createdAt: task.createdAt,
           completedAt: DateTime.now(),
           lunarDay: task.lunarDay,
           lunarMonth: task.lunarMonth,
@@ -108,13 +107,13 @@ class TaskRepositoryImpl implements TaskRepository {
         // 2. Calculate next occurrence for the original task
         final nextDate = task.isLunarCalendar
             ? LunarCalendarUtils.getNextLunarRecurrence(
-                currentDate: task.dueDate,
+                currentDate: task.dueDate!,
                 repeatType: task.repeatType.value,
                 repeatInterval: task.repeatInterval,
                 repeatWeekDays: task.repeatWeekDays,
               )
             : LunarCalendarUtils.getNextSolarRecurrence(
-                currentDate: task.dueDate,
+                currentDate: task.dueDate!,
                 repeatType: task.repeatType.value,
                 repeatInterval: task.repeatInterval,
                 repeatWeekDays: task.repeatWeekDays,
@@ -141,7 +140,7 @@ class TaskRepositoryImpl implements TaskRepository {
         await updateTask(updatedTask);
         return updatedTask;
       } else {
-        // Non-recurring task, just mark complete
+        // Non-recurring task (or recurring but no due date??), just mark complete
         final updatedTask = task.copyWith(
           isCompleted: true,
           completedAt: DateTime.now(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_lich_am/core/constants/app_colors.dart';
+import 'package:todo_lich_am/core/utils/lunar_calendar_utils.dart';
 import 'package:todo_lich_am/features/todo/domain/entities/task_entity.dart';
 import 'package:intl/intl.dart';
 
@@ -386,6 +387,8 @@ class TaskItemWidget extends StatelessWidget {
   }
 
   String _getRepeatText(TaskEntity task) {
+    if (task.dueDate == null && task.repeatWeekDays == null) return '';
+
     if (task.repeatInterval <= 1) {
       switch (task.repeatType) {
         case RepeatType.daily:
@@ -395,31 +398,51 @@ class TaskItemWidget extends StatelessWidget {
           if (task.repeatWeekDays != null && task.repeatWeekDays!.isNotEmpty) {
             final days = task.repeatWeekDays!..sort();
             daysText = days.map((day) => _getDayName(day)).join(', ');
+          } else if (task.dueDate != null) {
+            daysText = DateFormat('EEEE', locale).format(task.dueDate!);
           } else {
-            daysText = DateFormat('EEEE', locale).format(task.dueDate);
+            daysText = '';
           }
           return locale == 'vi'
               ? 'Hàng tuần vào $daysText'
               : 'Weekly on $daysText';
         case RepeatType.monthly:
           if (task.isLunarCalendar) {
+            final day =
+                task.lunarDay ??
+                (task.dueDate != null
+                    ? LunarCalendarUtils.solarToLunar(task.dueDate!).getDay()
+                    : 1);
             return locale == 'vi'
-                ? 'Hàng tháng vào ngày ${task.lunarDay} Âm lịch'
-                : 'Monthly on lunar day ${task.lunarDay}';
+                ? 'Hàng tháng vào ngày $day Âm lịch'
+                : 'Monthly on lunar day $day';
           } else {
+            final day = task.dueDate?.day ?? 1;
             return locale == 'vi'
-                ? 'Hàng tháng vào ngày ${task.dueDate.day}'
-                : 'Monthly on day ${task.dueDate.day}';
+                ? 'Hàng tháng vào ngày $day'
+                : 'Monthly on day $day';
           }
         case RepeatType.yearly:
           if (task.isLunarCalendar) {
+            final day =
+                task.lunarDay ??
+                (task.dueDate != null
+                    ? LunarCalendarUtils.solarToLunar(task.dueDate!).getDay()
+                    : 1);
+            final month =
+                task.lunarMonth ??
+                (task.dueDate != null
+                    ? LunarCalendarUtils.solarToLunar(task.dueDate!).getMonth()
+                    : 1);
             return locale == 'vi'
-                ? 'Hàng năm vào ${task.lunarDay}/${task.lunarMonth} Âm lịch'
-                : 'Yearly on lunar ${task.lunarDay}/${task.lunarMonth}';
+                ? 'Hàng năm vào $day/$month Âm lịch'
+                : 'Yearly on lunar $day/$month';
           } else {
+            final day = task.dueDate?.day ?? 1;
+            final month = task.dueDate?.month ?? 1;
             return locale == 'vi'
-                ? 'Hàng năm vào ${task.dueDate.day}/${task.dueDate.month}'
-                : 'Yearly on ${task.dueDate.day}/${task.dueDate.month}';
+                ? 'Hàng năm vào $day/$month'
+                : 'Yearly on $day/$month';
           }
         case RepeatType.none:
           return '';
@@ -435,30 +458,50 @@ class TaskItemWidget extends StatelessWidget {
           if (task.repeatWeekDays != null && task.repeatWeekDays!.isNotEmpty) {
             final days = task.repeatWeekDays!..sort();
             daysText = days.map((day) => _getDayName(day)).join(', ');
+          } else if (task.dueDate != null) {
+            daysText = DateFormat('EEEE', locale).format(task.dueDate!);
           } else {
-            daysText = DateFormat('EEEE', locale).format(task.dueDate);
+            daysText = '';
           }
           return locale == 'vi'
               ? 'Mỗi ${task.repeatInterval} tuần vào $daysText'
               : 'Every ${task.repeatInterval} weeks on $daysText';
         case RepeatType.monthly:
           if (task.isLunarCalendar) {
+            final day =
+                task.lunarDay ??
+                (task.dueDate != null
+                    ? LunarCalendarUtils.solarToLunar(task.dueDate!).getDay()
+                    : 1);
             return locale == 'vi'
-                ? 'Mỗi ${task.repeatInterval} tháng vào ngày ${task.lunarDay} Âm lịch'
-                : 'Every ${task.repeatInterval} months on lunar day ${task.lunarDay}';
+                ? 'Mỗi ${task.repeatInterval} tháng vào ngày $day Âm lịch'
+                : 'Every ${task.repeatInterval} months on lunar day $day';
           }
+          final day = task.dueDate?.day ?? 1;
           return locale == 'vi'
-              ? 'Mỗi ${task.repeatInterval} tháng vào ngày ${task.dueDate.day}'
-              : 'Every ${task.repeatInterval} months on day ${task.dueDate.day}';
+              ? 'Mỗi ${task.repeatInterval} tháng vào ngày $day'
+              : 'Every ${task.repeatInterval} months on day $day';
         case RepeatType.yearly:
           if (task.isLunarCalendar) {
+            final day =
+                task.lunarDay ??
+                (task.dueDate != null
+                    ? LunarCalendarUtils.solarToLunar(task.dueDate!).getDay()
+                    : 1);
+            final month =
+                task.lunarMonth ??
+                (task.dueDate != null
+                    ? LunarCalendarUtils.solarToLunar(task.dueDate!).getMonth()
+                    : 1);
             return locale == 'vi'
-                ? 'Mỗi ${task.repeatInterval} năm vào ${task.lunarDay}/${task.lunarMonth} Âm lịch'
-                : 'Every ${task.repeatInterval} years on lunar ${task.lunarDay}/${task.lunarMonth}';
+                ? 'Mỗi ${task.repeatInterval} năm vào $day/$month Âm lịch'
+                : 'Every ${task.repeatInterval} years on lunar $day/$month';
           }
+          final day = task.dueDate?.day ?? 1;
+          final month = task.dueDate?.month ?? 1;
           return locale == 'vi'
-              ? 'Mỗi ${task.repeatInterval} năm vào ${task.dueDate.day}/${task.dueDate.month}'
-              : 'Every ${task.repeatInterval} years on ${task.dueDate.day}/${task.dueDate.month}';
+              ? 'Mỗi ${task.repeatInterval} năm vào $day/$month'
+              : 'Every ${task.repeatInterval} years on $day/$month';
         case RepeatType.none:
           return '';
       }

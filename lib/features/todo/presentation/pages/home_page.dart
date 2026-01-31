@@ -193,6 +193,7 @@ class HomePage extends GetView<HomeController> {
                       ),
                       _buildTabItem(
                         context: context,
+                        icon: Icons.list_alt,
                         label: settings.locale.value == 'vi'
                             ? 'Công việc'
                             : 'Tasks',
@@ -236,9 +237,8 @@ class HomePage extends GetView<HomeController> {
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
         ),
-        child: const Icon(Icons.search, size: 20, color: Colors.grey),
+        child: const Icon(Icons.search, size: 24, color: Colors.grey),
       ),
     );
   }
@@ -295,17 +295,12 @@ class HomePage extends GetView<HomeController> {
               ? AppColors.primary.withOpacity(0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: controller.currentFilter.value != CalendarFilter.all
-                ? AppColors.primary
-                : Colors.grey.shade300,
-          ),
         ),
         child: Row(
           children: [
             Icon(
               Icons.filter_list,
-              size: 20,
+              size: 24,
               color: controller.currentFilter.value != CalendarFilter.all
                   ? AppColors.primary
                   : Colors.grey.shade600,
@@ -340,49 +335,34 @@ class HomePage extends GetView<HomeController> {
 
   Widget _buildTabItem({
     required BuildContext context,
-    IconData? icon,
+    required IconData icon,
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: 3,
+    return Tooltip(
+      message: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? AppColors.primary : Colors.transparent,
+                width: 3,
+              ),
             ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 18,
-                color: isSelected
-                    ? AppColors.primary
-                    : Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected
-                    ? AppColors.primary
-                    : Theme.of(context).textTheme.bodyMedium?.color,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ],
+          child: Icon(
+            icon,
+            size: 24,
+            color: isSelected
+                ? AppColors.primary
+                : Theme.of(context).textTheme.bodyMedium?.color,
+          ),
         ),
       ),
     );
