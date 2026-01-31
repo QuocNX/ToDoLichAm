@@ -111,11 +111,13 @@ class TaskRepositoryImpl implements TaskRepository {
                 currentDate: task.dueDate,
                 repeatType: task.repeatType.value,
                 repeatInterval: task.repeatInterval,
+                repeatWeekDays: task.repeatWeekDays,
               )
             : LunarCalendarUtils.getNextSolarRecurrence(
                 currentDate: task.dueDate,
                 repeatType: task.repeatType.value,
                 repeatInterval: task.repeatInterval,
+                repeatWeekDays: task.repeatWeekDays,
               );
 
         // Update lunar date info if using lunar calendar

@@ -26,6 +26,7 @@ class AddTaskController extends GetxController {
   final RxBool isLunarCalendar = false.obs;
   final Rx<RepeatType> repeatType = RepeatType.none.obs;
   final RxInt repeatInterval = 1.obs;
+  final RxList<int> selectedWeekDays = <int>[].obs;
   final RxBool isStarred = false.obs;
   final RxBool isLoading = false.obs;
 
@@ -52,6 +53,11 @@ class AddTaskController extends GetxController {
     // Listen to date and calendar type changes
     ever(selectedDate, (_) => _updateDateDisplays());
     ever(isLunarCalendar, (_) => _updateDateDisplays());
+    ever(repeatType, (type) {
+      if (type == RepeatType.weekly && selectedWeekDays.isEmpty) {
+        selectedWeekDays.add(selectedDate.value.weekday);
+      }
+    });
 
     repeatIntervalController.addListener(() {
       final val = int.tryParse(repeatIntervalController.text);
@@ -75,7 +81,20 @@ class AddTaskController extends GetxController {
     repeatType.value = task.repeatType;
     repeatInterval.value = task.repeatInterval;
     repeatIntervalController.text = task.repeatInterval.toString();
+    if (task.repeatWeekDays != null) {
+      selectedWeekDays.assignAll(task.repeatWeekDays!);
+    }
     isStarred.value = task.isStarred;
+  }
+
+  void toggleWeekDay(int day) {
+    if (selectedWeekDays.contains(day)) {
+      if (selectedWeekDays.length > 1) {
+        selectedWeekDays.remove(day);
+      }
+    } else {
+      selectedWeekDays.add(day);
+    }
   }
 
   void _updateDateDisplays() {
@@ -175,6 +194,9 @@ class AddTaskController extends GetxController {
         isLunarCalendar: isLunarCalendar.value,
         repeatType: repeatType.value,
         repeatInterval: int.tryParse(repeatIntervalController.text) ?? 1,
+        repeatWeekDays: repeatType.value == RepeatType.weekly
+            ? selectedWeekDays.toList()
+            : null,
         isCompleted: editingTask?.isCompleted ?? false,
         isStarred: isStarred.value,
         category: editingTask?.category ?? 'default',

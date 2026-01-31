@@ -55,6 +55,7 @@ class TaskEntity {
   final int? lunarDay;
   final int? lunarMonth;
   final int? lunarYear;
+  final List<int>? repeatWeekDays;
 
   const TaskEntity({
     required this.id,
@@ -73,6 +74,7 @@ class TaskEntity {
     this.lunarDay,
     this.lunarMonth,
     this.lunarYear,
+    this.repeatWeekDays,
   });
 
   TaskEntity copyWith({
@@ -92,6 +94,7 @@ class TaskEntity {
     int? lunarDay,
     int? lunarMonth,
     int? lunarYear,
+    List<int>? repeatWeekDays,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -110,6 +113,7 @@ class TaskEntity {
       lunarDay: lunarDay ?? this.lunarDay,
       lunarMonth: lunarMonth ?? this.lunarMonth,
       lunarYear: lunarYear ?? this.lunarYear,
+      repeatWeekDays: repeatWeekDays ?? this.repeatWeekDays,
     );
   }
 

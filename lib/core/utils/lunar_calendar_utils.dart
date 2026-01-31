@@ -102,6 +102,7 @@ class LunarCalendarUtils {
     required DateTime currentDate,
     required String repeatType,
     int repeatInterval = 1,
+    List<int>? repeatWeekDays,
   }) {
     final lunar = solarToLunar(currentDate);
 
@@ -110,6 +111,13 @@ class LunarCalendarUtils {
         return currentDate.add(Duration(days: 1 * repeatInterval));
 
       case 'weekly':
+        if (repeatWeekDays != null && repeatWeekDays.isNotEmpty) {
+          return _getNextWeeklyOccurrence(
+            currentDate,
+            repeatInterval,
+            repeatWeekDays,
+          );
+        }
         return currentDate.add(Duration(days: 7 * repeatInterval));
 
       case 'monthly':
@@ -144,12 +152,20 @@ class LunarCalendarUtils {
     required DateTime currentDate,
     required String repeatType,
     int repeatInterval = 1,
+    List<int>? repeatWeekDays,
   }) {
     switch (repeatType) {
       case 'daily':
         return currentDate.add(Duration(days: 1 * repeatInterval));
 
       case 'weekly':
+        if (repeatWeekDays != null && repeatWeekDays.isNotEmpty) {
+          return _getNextWeeklyOccurrence(
+            currentDate,
+            repeatInterval,
+            repeatWeekDays,
+          );
+        }
         return currentDate.add(Duration(days: 7 * repeatInterval));
 
       case 'monthly':
@@ -176,6 +192,40 @@ class LunarCalendarUtils {
       default:
         return currentDate;
     }
+  }
+
+  static DateTime _getNextWeeklyOccurrence(
+    DateTime currentDate,
+    int repeatInterval,
+    List<int> weekDays,
+  ) {
+    // Sort weekDays to be sure
+    final sortedDays = List<int>.from(weekDays)..sort();
+    final currentDay = currentDate.weekday;
+
+    // Check if there is a day later in this week
+    for (final day in sortedDays) {
+      if (day > currentDay) {
+        return currentDate.add(Duration(days: day - currentDay));
+      }
+    }
+
+    // If not, wrap to next interval
+    // If repeatInterval is 1, next week.
+    final firstDay = sortedDays.first;
+
+    final currentWeekMonday = currentDate.subtract(
+      Duration(days: currentDay - 1),
+    );
+    final nextCycleMonday = currentWeekMonday.add(
+      Duration(days: 7 * repeatInterval),
+    );
+    final nextDate = nextCycleMonday.add(Duration(days: firstDay - 1));
+
+    // Let's stick to Duration addition to be consistent with other cases.
+    return currentDate.add(
+      Duration(days: nextDate.difference(currentDate).inDays),
+    );
   }
 
   /// Gets the Vietnamese GanZhi (Can Chi) name for a lunar year.

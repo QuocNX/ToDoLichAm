@@ -391,10 +391,16 @@ class TaskItemWidget extends StatelessWidget {
         case RepeatType.daily:
           return locale == 'vi' ? 'Hàng ngày' : 'Daily';
         case RepeatType.weekly:
-          final dayOfWeek = DateFormat('EEEE', locale).format(task.dueDate);
+          String daysText;
+          if (task.repeatWeekDays != null && task.repeatWeekDays!.isNotEmpty) {
+            final days = task.repeatWeekDays!..sort();
+            daysText = days.map((day) => _getDayName(day)).join(', ');
+          } else {
+            daysText = DateFormat('EEEE', locale).format(task.dueDate);
+          }
           return locale == 'vi'
-              ? 'Hàng tuần vào $dayOfWeek'
-              : 'Weekly on $dayOfWeek';
+              ? 'Hàng tuần vào $daysText'
+              : 'Weekly on $daysText';
         case RepeatType.monthly:
           if (task.isLunarCalendar) {
             return locale == 'vi'
@@ -425,10 +431,16 @@ class TaskItemWidget extends StatelessWidget {
               ? 'Mỗi ${task.repeatInterval} ngày'
               : 'Every ${task.repeatInterval} days';
         case RepeatType.weekly:
-          final dayOfWeek = DateFormat('EEEE', locale).format(task.dueDate);
+          String daysText;
+          if (task.repeatWeekDays != null && task.repeatWeekDays!.isNotEmpty) {
+            final days = task.repeatWeekDays!..sort();
+            daysText = days.map((day) => _getDayName(day)).join(', ');
+          } else {
+            daysText = DateFormat('EEEE', locale).format(task.dueDate);
+          }
           return locale == 'vi'
-              ? 'Mỗi ${task.repeatInterval} tuần vào $dayOfWeek'
-              : 'Every ${task.repeatInterval} weeks on $dayOfWeek';
+              ? 'Mỗi ${task.repeatInterval} tuần vào $daysText'
+              : 'Every ${task.repeatInterval} weeks on $daysText';
         case RepeatType.monthly:
           if (task.isLunarCalendar) {
             return locale == 'vi'
@@ -448,6 +460,51 @@ class TaskItemWidget extends StatelessWidget {
               ? 'Mỗi ${task.repeatInterval} năm vào ${task.dueDate.day}/${task.dueDate.month}'
               : 'Every ${task.repeatInterval} years on ${task.dueDate.day}/${task.dueDate.month}';
         case RepeatType.none:
+          return '';
+      }
+    }
+  }
+
+  String _getDayName(int weekday) {
+    if (locale == 'vi') {
+      // User said: "thứ 6, 7, CN".
+      // Let's try to match:
+      switch (weekday) {
+        case 1:
+          return 'Thứ 2';
+        case 2:
+          return 'Thứ 3';
+        case 3:
+          return 'Thứ 4';
+        case 4:
+          return 'Thứ 5';
+        case 5:
+          return 'Thứ 6';
+        case 6:
+          return 'Thứ 7';
+        case 7:
+          return 'CN';
+        default:
+          return '';
+      }
+    } else {
+      // English
+      switch (weekday) {
+        case 1:
+          return 'Mon';
+        case 2:
+          return 'Tue';
+        case 3:
+          return 'Wed';
+        case 4:
+          return 'Thu';
+        case 5:
+          return 'Fri';
+        case 6:
+          return 'Sat';
+        case 7:
+          return 'Sun';
+        default:
           return '';
       }
     }

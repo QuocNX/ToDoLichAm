@@ -320,72 +320,132 @@ class AddTaskPage extends GetView<AddTaskController> {
     ];
 
     return Obx(
-      () => Row(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Interval input
-          if (controller.repeatType.value != RepeatType.none) ...[
-            SizedBox(
-              width: 80,
-              child: TextField(
-                controller: controller.repeatIntervalController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? AppColors.darkSurfaceVariant
-                      : AppColors.lightSurfaceVariant,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+          Row(
+            children: [
+              // Interval input
+              if (controller.repeatType.value != RepeatType.none) ...[
+                SizedBox(
+                  width: 80,
+                  child: TextField(
+                    controller: controller.repeatIntervalController,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.darkSurfaceVariant
+                          : AppColors.lightSurfaceVariant,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 14,
+                ),
+                const SizedBox(width: 12),
+              ],
+
+              // Repeat type dropdown
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkSurfaceVariant
+                        : AppColors.lightSurfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButton<RepeatType>(
+                    value: controller.repeatType.value,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    icon: const Icon(Icons.chevron_right),
+                    items: repeatOptions.map((option) {
+                      return DropdownMenuItem<RepeatType>(
+                        value: option.$1,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.repeat, size: 20),
+                            const SizedBox(width: 12),
+                            Text(option.$2),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.repeatType.value = value;
+                      }
+                    },
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-          ],
+            ],
+          ),
 
-          // Repeat type dropdown
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.darkSurfaceVariant
-                    : AppColors.lightSurfaceVariant,
-                borderRadius: BorderRadius.circular(12),
+          // Weekly day selector
+          if (controller.repeatType.value == RepeatType.weekly) ...[
+            const SizedBox(height: 16),
+            _buildWeekDaySelector(context, isVi),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekDaySelector(BuildContext context, bool isVi) {
+    // 1=Mon, 7=Sun
+    final days = List.generate(7, (index) => index + 1);
+    final labels = isVi
+        ? ['2', '3', '4', '5', '6', '7', 'CN']
+        : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(7, (index) {
+        final day = days[index];
+        final label = labels[index];
+        final isSelected = controller.selectedWeekDays.contains(day);
+
+        return GestureDetector(
+          onTap: () => controller.toggleWeekDay(day),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary
+                    : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white54
+                          : Colors.black26),
               ),
-              child: DropdownButton<RepeatType>(
-                value: controller.repeatType.value,
-                isExpanded: true,
-                underline: const SizedBox(),
-                icon: const Icon(Icons.chevron_right),
-                items: repeatOptions.map((option) {
-                  return DropdownMenuItem<RepeatType>(
-                    value: option.$1,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.repeat, size: 20),
-                        const SizedBox(width: 12),
-                        Text(option.$2),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    controller.repeatType.value = value;
-                  }
-                },
+            ),
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
             ),
           ),
-        ],
-      ),
+        );
+      }),
     );
   }
 
