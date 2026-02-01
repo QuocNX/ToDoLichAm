@@ -494,6 +494,8 @@ class HomePage extends GetView<HomeController> {
                       locale: settings.locale.value,
                       showLunar: settings.showLunar,
                       showSolar: settings.showSolar,
+                      showDaysRemaining: true,
+                      isCompletedGroup: true,
                     ),
                     ...dateTasks.map(
                       (task) => TaskItemWidget(

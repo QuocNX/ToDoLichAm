@@ -8,6 +8,8 @@ class DateGroupHeader extends StatelessWidget {
   final String locale;
   final bool showLunar;
   final bool showSolar;
+  final bool showDaysRemaining;
+  final bool isCompletedGroup;
 
   const DateGroupHeader({
     super.key,
@@ -15,6 +17,8 @@ class DateGroupHeader extends StatelessWidget {
     required this.locale,
     this.showLunar = true,
     this.showSolar = true,
+    this.showDaysRemaining = true,
+    this.isCompletedGroup = false,
   });
 
   @override
@@ -132,14 +136,16 @@ class DateGroupHeader extends StatelessWidget {
               ],
             ),
           ),
-          if (!isToday && daysRemaining != 0)
+          if (showDaysRemaining && !isToday && daysRemaining != 0)
             Container(
               margin: const EdgeInsets.only(left: 8),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: daysRemaining > 0
-                    ? AppColors.primary.withOpacity(0.1)
-                    : AppColors.error.withOpacity(0.1),
+                color: isCompletedGroup
+                    ? Colors.green.withOpacity(0.1)
+                    : (daysRemaining > 0
+                          ? AppColors.primary.withOpacity(0.1)
+                          : AppColors.error.withOpacity(0.1)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -147,9 +153,11 @@ class DateGroupHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: daysRemaining > 0
-                      ? AppColors.primary
-                      : AppColors.error,
+                  color: isCompletedGroup
+                      ? Colors.green
+                      : (daysRemaining > 0
+                            ? AppColors.primary
+                            : AppColors.error),
                 ),
               ),
             ),
@@ -188,9 +196,20 @@ class DateGroupHeader extends StatelessWidget {
 
   String _getDaysRemainingText(int days) {
     if (days > 0) {
+      if (isCompletedGroup) {
+        return locale == 'vi'
+            ? 'Hoàn thành sớm $days ngày'
+            : 'Completed $days days early';
+      }
       return locale == 'vi' ? 'Còn $days ngày' : '$days days left';
     } else {
-      return locale == 'vi' ? 'Quá hạn ${-days} ngày' : '${-days} days overdue';
+      final absDays = -days;
+      if (isCompletedGroup) {
+        return locale == 'vi'
+            ? 'Đã xong $absDays ngày trước'
+            : 'Done $absDays days ago';
+      }
+      return locale == 'vi' ? 'Quá hạn $absDays ngày' : '$absDays days overdue';
     }
   }
 }

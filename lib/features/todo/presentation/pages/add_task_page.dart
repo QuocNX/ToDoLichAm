@@ -50,177 +50,291 @@ class AddTaskPage extends GetView<AddTaskController> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // 1. Title Input (Always visible, autofocus)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: TextField(
-              controller: controller.titleController,
-              autofocus: !controller.isEditing,
-              decoration: InputDecoration(
-                hintText: isVi ? 'Nhập tiêu đề công việc' : 'Enter task title',
-                border: InputBorder.none,
-                hintStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: (_) => controller.saveTask(),
-            ),
-          ),
-
-          // 3. Expandable Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+          Obx(
+            () => IgnorePointer(
+              ignoring: controller.isCompleted.value,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Description
-                  Obx(() {
-                    if (controller.isDescriptionVisible.value) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: controller.descriptionController,
-                            decoration: InputDecoration(
-                              hintText: isVi
-                                  ? 'Nhập mô tả chi tiết'
-                                  : 'Enter details',
-                              border: const OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.all(12),
-                            ),
-                            maxLines: 3,
-                            textCapitalization: TextCapitalization.sentences,
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
-
-                  // Schedule Section
-                  Obx(() {
-                    if (controller.isScheduleVisible.value) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Calendar type toggle
-                          _buildLabel(isVi ? 'Loại lịch' : 'Calendar type'),
-                          const SizedBox(height: 8),
-                          _buildCalendarToggle(context, isVi),
-                          const SizedBox(height: 20),
-
-                          // Date selector
-                          _buildLabel(isVi ? 'Ngày' : 'Date'),
-                          const SizedBox(height: 8),
-                          _buildDateSelector(context, isVi),
-                          const SizedBox(height: 20),
-
-                          // Time selector
-                          _buildLabel(isVi ? 'Giờ' : 'Time'),
-                          const SizedBox(height: 8),
-                          _buildTimeSelector(context, isVi),
-                          const SizedBox(height: 20),
-
-                          // Repeat selector
-                          _buildLabel(isVi ? 'Lặp lại' : 'Repeat'),
-                          const SizedBox(height: 8),
-                          _buildRepeatSelector(context, isVi),
-                          const SizedBox(height: 20),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
-
-                  const SizedBox(height: 16),
-                  const Divider(height: 1),
-                  const SizedBox(height: 8),
-
-                  // Toolbar (Moved here)
+                  // 1. Title Input (Always visible, autofocus)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        // Description Toggle
-                        Obx(
-                          () => IconButton(
-                            icon: Icon(
-                              Icons.description_outlined,
-                              color: controller.isDescriptionVisible.value
-                                  ? AppColors.primary
-                                  : Colors.grey,
-                            ),
-                            tooltip: isVi ? 'Thêm mô tả' : 'Add description',
-                            onPressed: controller.toggleDescription,
-                          ),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: TextField(
+                      controller: controller.titleController,
+                      autofocus: !controller.isEditing,
+                      decoration: InputDecoration(
+                        hintText: isVi
+                            ? 'Nhập tiêu đề công việc'
+                            : 'Enter task title',
+                        border: InputBorder.none,
+                        hintStyle: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.normal,
                         ),
-                        // Schedule Toggle
-                        Obx(
-                          () => IconButton(
-                            icon: Icon(
-                              Icons.calendar_today_outlined,
-                              color: controller.isScheduleVisible.value
-                                  ? AppColors.primary
-                                  : Colors.grey,
-                            ),
-                            tooltip: isVi ? 'Lên lịch' : 'Schedule',
-                            onPressed: controller.toggleSchedule,
-                          ),
-                        ),
-                        // Star Toggle
-                        Obx(
-                          () => IconButton(
-                            icon: Icon(
-                              controller.isStarred.value
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              color: controller.isStarred.value
-                                  ? AppColors.star
-                                  : Colors.grey,
-                            ),
-                            tooltip: isVi
-                                ? 'Đánh dấu yêu thích'
-                                : 'Mark as favorite',
-                            onPressed: () => controller.isStarred.toggle(),
-                          ),
-                        ),
-                        const Spacer(),
-                        // Save Button
-                        Obx(
-                          () => IconButton(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : controller.saveTask,
-                            icon: controller.isLoading.value
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.save,
-                                    color: AppColors.primary,
-                                  ),
-                            tooltip: isVi ? 'Lưu' : 'Save',
-                          ),
-                        ),
-                      ],
+                      ),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      onSubmitted: (_) => controller.saveTask(),
                     ),
                   ),
-                  const SizedBox(height: 300),
+
+                  // 3. Expandable Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Description
+                          Obx(() {
+                            if (controller.isDescriptionVisible.value) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TextField(
+                                    controller:
+                                        controller.descriptionController,
+                                    decoration: InputDecoration(
+                                      hintText: isVi
+                                          ? 'Nhập mô tả chi tiết'
+                                          : 'Enter details',
+                                      border: const OutlineInputBorder(),
+                                      contentPadding: const EdgeInsets.all(12),
+                                    ),
+                                    maxLines: 3,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          }),
+
+                          // Schedule Section
+                          Obx(() {
+                            if (controller.isScheduleVisible.value) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Calendar type toggle
+                                  _buildLabel(
+                                    isVi ? 'Loại lịch' : 'Calendar type',
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildCalendarToggle(context, isVi),
+                                  const SizedBox(height: 20),
+
+                                  // Date selector
+                                  _buildLabel(isVi ? 'Ngày' : 'Date'),
+                                  const SizedBox(height: 8),
+                                  _buildDateSelector(context, isVi),
+                                  const SizedBox(height: 20),
+
+                                  // Time selector
+                                  _buildLabel(isVi ? 'Giờ' : 'Time'),
+                                  const SizedBox(height: 8),
+                                  _buildTimeSelector(context, isVi),
+                                  const SizedBox(height: 20),
+
+                                  // Repeat selector
+                                  _buildLabel(isVi ? 'Lặp lại' : 'Repeat'),
+                                  const SizedBox(height: 8),
+                                  _buildRepeatSelector(context, isVi),
+                                  const SizedBox(height: 20),
+                                ],
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          }),
+
+                          const SizedBox(height: 16),
+                          const Divider(height: 1),
+                          const SizedBox(height: 8),
+
+                          // Toolbar (Moved here)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                // Description Toggle
+                                Obx(
+                                  () => IconButton(
+                                    icon: Icon(
+                                      Icons.description_outlined,
+                                      color:
+                                          controller.isDescriptionVisible.value
+                                          ? AppColors.primary
+                                          : Colors.grey,
+                                    ),
+                                    tooltip: isVi
+                                        ? 'Thêm mô tả'
+                                        : 'Add description',
+                                    onPressed: controller.toggleDescription,
+                                  ),
+                                ),
+                                // Schedule Toggle
+                                Obx(
+                                  () => IconButton(
+                                    icon: Icon(
+                                      Icons.calendar_today_outlined,
+                                      color: controller.isScheduleVisible.value
+                                          ? AppColors.primary
+                                          : Colors.grey,
+                                    ),
+                                    tooltip: isVi ? 'Lên lịch' : 'Schedule',
+                                    onPressed: controller.toggleSchedule,
+                                  ),
+                                ),
+                                // Star Toggle
+                                Obx(
+                                  () => IconButton(
+                                    icon: Icon(
+                                      controller.isStarred.value
+                                          ? Icons.star
+                                          : Icons.star_border,
+                                      color: controller.isStarred.value
+                                          ? AppColors.star
+                                          : Colors.grey,
+                                    ),
+                                    tooltip: isVi
+                                        ? 'Đánh dấu yêu thích'
+                                        : 'Mark as favorite',
+                                    onPressed: () =>
+                                        controller.isStarred.toggle(),
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Save Button
+                                Obx(
+                                  () => IconButton(
+                                    onPressed: controller.isLoading.value
+                                        ? null
+                                        : controller.saveTask,
+                                    icon: controller.isLoading.value
+                                        ? const SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.save,
+                                            color: AppColors.primary,
+                                          ),
+                                    tooltip: isVi ? 'Lưu' : 'Save',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 300),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
+          ),
+          Obx(
+            () => controller.isCompleted.value
+                ? Container(
+                    color: Colors.black.withOpacity(0.6),
+                    alignment: Alignment.center,
+                    child: Container(
+                      margin: const EdgeInsets.all(32),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 32,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          const BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 20,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: Colors.green,
+                              size: 40,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            isVi ? 'Đã hoàn thành' : 'Completed',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            isVi
+                                ? 'Công việc này đã được hoàn thành. Đánh dấu chưa hoàn thành để tiếp tục chỉnh sửa.'
+                                : 'This task is completed. Mark as incomplete to edit.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: controller.markAsIncomplete,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                isVi
+                                    ? 'Đánh dấu chưa hoàn thành'
+                                    : 'Mark as Incomplete',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),

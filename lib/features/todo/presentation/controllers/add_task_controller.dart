@@ -28,6 +28,7 @@ class AddTaskController extends GetxController {
   final RxInt repeatInterval = 1.obs;
   final RxList<int> selectedWeekDays = <int>[].obs;
   final RxBool isStarred = false.obs;
+  final RxBool isCompleted = false.obs;
   final RxBool isLoading = false.obs;
 
   // Visibility state
@@ -111,6 +112,7 @@ class AddTaskController extends GetxController {
       selectedWeekDays.assignAll(task.repeatWeekDays!);
     }
     isStarred.value = task.isStarred;
+    isCompleted.value = task.isCompleted;
   }
 
   void toggleDescription() {
@@ -255,7 +257,7 @@ class AddTaskController extends GetxController {
         repeatWeekDays: repeatType.value == RepeatType.weekly
             ? selectedWeekDays.toList()
             : null,
-        isCompleted: editingTask?.isCompleted ?? false,
+        isCompleted: isCompleted.value,
         isStarred: isStarred.value,
         category: editingTask?.category ?? 'default',
         createdAt: editingTask?.createdAt ?? DateTime.now(),
@@ -321,6 +323,10 @@ class AddTaskController extends GetxController {
       await _repository.deleteTask(editingTask!.id);
       Get.back(result: true);
     }
+  }
+
+  void markAsIncomplete() {
+    isCompleted.value = false;
   }
 
   @override

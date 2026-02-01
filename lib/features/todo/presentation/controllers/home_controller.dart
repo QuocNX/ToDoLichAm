@@ -228,11 +228,17 @@ class HomeController extends GetxController {
       }
 
       DateTime dateKey;
-      if (task.dueDate != null) {
+      // Prioritize completedAt, fallback to dueDate, then 0 (No Date)
+      // Actually, if it's completed, it should ideally have completedAt.
+      // If not, maybe use dueDate or even createdAt.
+      // Using dueDate as fallback to be safe.
+      final effectiveDate = task.completedAt ?? task.dueDate;
+
+      if (effectiveDate != null) {
         dateKey = DateTime(
-          task.dueDate!.year,
-          task.dueDate!.month,
-          task.dueDate!.day,
+          effectiveDate.year,
+          effectiveDate.month,
+          effectiveDate.day,
         );
       } else {
         dateKey = DateTime(0);
@@ -241,12 +247,12 @@ class HomeController extends GetxController {
       grouped.putIfAbsent(dateKey, () => []).add(task);
     }
 
-    // Sort the map by date
+    // Sort the map by date descending (latest first)
     final sortedEntries = grouped.entries.toList()
       ..sort((a, b) {
-        if (a.key.year == 0) return 1;
+        if (a.key.year == 0) return 1; // Put "No Date" at the bottom
         if (b.key.year == 0) return -1;
-        return a.key.compareTo(b.key);
+        return b.key.compareTo(a.key); // Descending order
       });
 
     return Map.fromEntries(sortedEntries);

@@ -170,6 +170,31 @@ class TaskItemWidget extends StatelessWidget {
                           ],
                         ],
                       ),
+                    // Scheduled date for completed tasks
+                    if (task.isCompleted && task.dueDate != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_month_outlined,
+                            size: 14,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _getScheduledDateText(task.dueDate!),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -550,6 +575,20 @@ class TaskItemWidget extends StatelessWidget {
         default:
           return '';
       }
+    }
+  }
+
+  String _getScheduledDateText(DateTime date) {
+    final dayOfWeek = _getDayName(date.weekday);
+    if (task.isLunarCalendar) {
+      final lunar = LunarCalendarUtils.solarToLunar(date);
+      final day = lunar.getDay().toString().padLeft(2, '0');
+      final month = lunar.getMonth().toString().padLeft(2, '0');
+      final year = lunar.getYear();
+      final ganZhi = LunarCalendarUtils.getVietnameseGanZhiYear(year);
+      return '$dayOfWeek, $day/$month/$year - $ganZhi';
+    } else {
+      return '$dayOfWeek, ${DateFormat('dd/MM/yyyy').format(date)}';
     }
   }
 }
