@@ -134,10 +134,14 @@ class TaskItemWidget extends StatelessWidget {
                     // Time and repeat info
                     if (task.time != null || task.repeatType != RepeatType.none)
                       const SizedBox(height: 4),
-                    if (task.time != null || task.repeatType != RepeatType.none)
+                    if ((task.time != null && !task.isCompleted) ||
+                        task.repeatType != RepeatType.none)
+                      const SizedBox(height: 4),
+                    if ((task.time != null && !task.isCompleted) ||
+                        task.repeatType != RepeatType.none)
                       Row(
                         children: [
-                          if (task.time != null) ...[
+                          if (task.time != null && !task.isCompleted) ...[
                             Text(
                               _formatTime(task.time!),
                               style: TextStyle(
@@ -149,7 +153,8 @@ class TaskItemWidget extends StatelessWidget {
                             ),
                           ],
                           if (task.repeatType != RepeatType.none) ...[
-                            if (task.time != null) const SizedBox(width: 8),
+                            if (task.time != null && !task.isCompleted)
+                              const SizedBox(width: 8),
                             Icon(
                               Icons.repeat,
                               size: 14,
@@ -184,7 +189,34 @@ class TaskItemWidget extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            _getScheduledDateText(task.dueDate!),
+                            task.time != null
+                                ? '${_getScheduledDateText(task.dueDate!)} - ${_formatTime(task.time!)}'
+                                : _getScheduledDateText(task.dueDate!),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    // Completed time
+                    if (task.isCompleted && task.completedAt != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 14,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${locale == 'vi' ? 'Đã hoàn thành lúc: ' : 'Completed at: '}${_formatFullTime(task.completedAt!)}',
                             style: TextStyle(
                               fontSize: 13,
                               color: isDark
@@ -409,6 +441,13 @@ class TaskItemWidget extends StatelessWidget {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _formatFullTime(DateTime time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    final second = time.second.toString().padLeft(2, '0');
+    return '$hour:$minute:$second';
   }
 
   String _getRepeatText(TaskEntity task) {
