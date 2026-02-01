@@ -219,6 +219,8 @@ class HomePage extends GetView<HomeController> {
                 const SizedBox(width: 12),
                 _buildSearchButton(context),
                 const SizedBox(width: 8),
+                _buildSortButton(context, settings),
+                const SizedBox(width: 8),
                 _buildFilterButton(context, settings),
               ],
             ],
@@ -239,6 +241,29 @@ class HomePage extends GetView<HomeController> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.search, size: 24, color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildSortButton(BuildContext context, SettingsService settings) {
+    return InkWell(
+      onTap: controller.toggleSortOrder,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Obx(
+          () => Icon(
+            controller.sortNoDateFirst.value
+                ? Icons.arrow_upward
+                : Icons.arrow_downward,
+            size: 24,
+            color: Colors.grey,
+          ),
+        ),
       ),
     );
   }

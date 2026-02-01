@@ -33,6 +33,9 @@ class HomeController extends GetxController {
   final Rx<DateTime> selectedDate = DateTime.now().obs;
   final Rx<DateTime> focusedDay = DateTime.now().obs;
 
+  // Sorting state: true = No Date first, false = No Date last
+  final RxBool sortNoDateFirst = true.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -140,12 +143,30 @@ class HomeController extends GetxController {
     update();
   }
 
+  /// Toggles sort order for "No Date" tasks.
+  void toggleSortOrder() {
+    sortNoDateFirst.value = !sortNoDateFirst.value;
+    update();
+  }
+
   void _sortTasks() {
     tasks.sort((a, b) {
       if (a.dueDate == null && b.dueDate == null) return 0;
       if (a.dueDate == null) return 1;
       if (b.dueDate == null) return -1;
-      return a.dueDate!.compareTo(b.dueDate!);
+
+      final dateComparison = a.dueDate!.compareTo(b.dueDate!);
+      if (dateComparison != 0) return dateComparison;
+
+      // Same date, check time
+      if (a.time == null && b.time == null) return 0;
+      if (a.time == null) return -1; // No time first
+      if (b.time == null) return 1;
+
+      // Compare time (only hour and minute matter)
+      final aTime = a.time!.hour * 60 + a.time!.minute;
+      final bTime = b.time!.hour * 60 + b.time!.minute;
+      return aTime.compareTo(bTime);
     });
   }
 
@@ -185,8 +206,8 @@ class HomeController extends GetxController {
     // Sort the map by date
     final sortedEntries = grouped.entries.toList()
       ..sort((a, b) {
-        if (a.key.year == 0) return 1; // No Date at bottom
-        if (b.key.year == 0) return -1;
+        if (a.key.year == 0) return sortNoDateFirst.value ? -1 : 1;
+        if (b.key.year == 0) return sortNoDateFirst.value ? 1 : -1;
         return a.key.compareTo(b.key);
       });
 
