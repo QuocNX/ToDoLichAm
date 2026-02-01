@@ -70,10 +70,6 @@ class DateGroupHeader extends StatelessWidget {
     String? relativeLabel;
     if (LunarCalendarUtils.isToday(date)) {
       relativeLabel = locale == 'vi' ? 'Hôm nay' : 'Today';
-    } else if (LunarCalendarUtils.isYesterday(date)) {
-      relativeLabel = locale == 'vi' ? 'Hôm qua' : 'Yesterday';
-    } else if (LunarCalendarUtils.isTomorrow(date)) {
-      relativeLabel = locale == 'vi' ? 'Ngày mai' : 'Tomorrow';
     }
 
     return Container(
